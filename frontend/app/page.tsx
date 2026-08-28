@@ -54,22 +54,22 @@ function SignalMeter({ score }: { score: number }) {
 
 function Th({ children }: { children?: React.ReactNode }) {
   return (
-    <th className="text-left text-[10px] font-semibold text-[var(--muted)] uppercase tracking-wider px-4 py-2.5 border-b border-[var(--line)]">
+    <th className="text-left text-[12px] font-semibold text-[var(--muted)] uppercase tracking-wider px-4 py-3 border-b border-[var(--line)]">
       {children}
     </th>
   );
 }
 
 function Td({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <td className={`px-4 py-2.5 border-b border-[var(--line)] text-[13px] ${className}`}>{children}</td>;
+  return <td className={`px-4 py-3 border-b border-[var(--line)] text-[15px] ${className}`}>{children}</td>;
 }
 
 function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
-    <section className="mb-6">
-      <div className="flex items-baseline gap-2 mb-3">
-        <h2 className="text-sm font-semibold tracking-tight">{title}</h2>
-        {hint && <span className="text-xs text-[var(--muted)]">· {hint}</span>}
+    <section className="mb-8">
+      <div className="flex items-baseline gap-2 mb-4">
+        <h2 className="text-base font-semibold tracking-tight">{title}</h2>
+        {hint && <span className="text-sm text-[var(--muted)]">· {hint}</span>}
       </div>
       {children}
     </section>
@@ -79,26 +79,26 @@ function Section({ title, hint, children }: { title: string; hint?: string; chil
 function WhatToDo() {
   return (
     <Section title="What to do" hint="the decision, then the evidence">
-      <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-4">
+      <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
         {actions.map((a, idx) => (
           <div
             key={a.action}
-            className={`flex items-center justify-between gap-3 py-3 border-b border-[var(--line)] first:pt-0 last:pb-0 last:border-0 ${idx === 0 ? "border-l-2 border-l-[var(--accent)] pl-4 -ml-4" : ""}`}
+            className={`flex items-center justify-between gap-4 py-4 border-b border-[var(--line)] first:pt-0 last:pb-0 last:border-0 ${idx === 0 ? "border-l-2 border-l-[var(--accent)] pl-4 -ml-5" : ""}`}
           >
             <div>
-              <div className="text-[13px] font-medium">{a.action}</div>
-              <div className="text-[11px] text-[var(--muted)] mt-0.5">{a.evidence}</div>
-              <div className="text-[11px] text-[var(--accent)] mt-1">Why first: {a.why}</div>
+              <div className="text-[16px] font-medium">{a.action}</div>
+              <div className="text-[14px] text-[var(--muted)] mt-1">{a.evidence}</div>
+              <div className="text-[14px] text-[var(--accent)] mt-1.5">Why first: {a.why}</div>
             </div>
             <div className="text-right shrink-0">
               <span
-                className={`text-[11px] font-medium px-2 py-0.5 rounded ${
+                className={`text-[13px] font-medium px-2.5 py-1 rounded ${
                   a.approval === "Approved" ? "bg-[var(--pos-soft)] text-[var(--pos)]" : "bg-[var(--neg-soft)] text-[var(--neg)]"
                 }`}
               >
                 {a.approval}
               </span>
-              <div className="num text-[11px] text-[var(--muted)] mt-1">{a.lift}</div>
+              <div className="num text-[14px] text-[var(--muted)] mt-1.5">{a.lift}</div>
             </div>
           </div>
         ))}
@@ -110,34 +110,34 @@ function WhatToDo() {
 function WhyItMatters() {
   return (
     <Section title="Why it matters" hint="the number, then the meaning">
-      <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
-        <div className="flex items-center gap-3">
-          <span className="num text-2xl font-semibold">{health.score}</span>
+      <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-6">
+        <div className="flex items-center gap-4">
+          <span className="num text-4xl font-semibold tracking-tight">{health.score}</span>
           <SignalMeter score={health.score} />
-          <span className="text-sm text-[var(--neg)] font-medium">{health.label}</span>
+          <span className="text-base text-[var(--neg)] font-medium">{health.label}</span>
         </div>
 
-        <div className="text-[14px] font-semibold mt-4">{largestOpportunity.title}</div>
-        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5">
+        <div className="text-[17px] font-semibold mt-5">{largestOpportunity.title}</div>
+        <div className="flex flex-wrap gap-x-5 gap-y-1.5 mt-2">
           {largestOpportunity.inputs.map((i) => (
-            <span key={i.label} className="text-[12px] text-[var(--muted)]">
+            <span key={i.label} className="text-[14px] text-[var(--muted)]">
               <span className="num text-[var(--ink)] font-medium">{i.value}</span> {i.label.toLowerCase()}
             </span>
           ))}
         </div>
 
-        <div className="mt-3 text-[13px] text-[var(--accent)] bg-[var(--accent-soft)] border border-[var(--line)] rounded-lg px-4 py-3 leading-relaxed">
+        <div className="mt-4 text-[15px] text-[var(--accent)] bg-[var(--accent-soft)] border border-[var(--line)] rounded-lg px-5 py-3.5 leading-relaxed">
           {signalRelationship}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
           {opportunityContext.map((c) => (
-            <div key={c.layer} className="bg-[var(--panel-2)] border border-[var(--line)] rounded-lg p-4">
+            <div key={c.layer} className="bg-[var(--panel-2)] border border-[var(--line)] rounded-lg p-5">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] uppercase tracking-wider text-[var(--accent)] font-semibold">{c.layer}</span>
+                <span className="text-[13px] uppercase tracking-wider text-[var(--accent)] font-semibold">{c.layer}</span>
                 <SourceTag k={c.source} />
               </div>
-              <div className="text-[13px] leading-relaxed mt-2">{c.text}</div>
+              <div className="text-[15px] leading-relaxed mt-2.5">{c.text}</div>
             </div>
           ))}
         </div>
@@ -149,21 +149,21 @@ function WhyItMatters() {
 function DidItMove() {
   return (
     <Section title="The result so far" hint="GEO movement, with the honest boundary">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {lift.map((l) => (
-          <div key={l.label} className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-4">
-            <div className="text-[11px] text-[var(--muted)]">{l.label}</div>
-            <div className="num text-2xl font-semibold text-[var(--pos)] mt-1">{l.value}</div>
-            <div className="mt-2"><SourceTag k={l.source} /></div>
+          <div key={l.label} className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
+            <div className="text-[13px] text-[var(--muted)]">{l.label}</div>
+            <div className="num text-3xl font-semibold text-[var(--pos)] mt-1.5">{l.value}</div>
+            <div className="mt-2.5"><SourceTag k={l.source} /></div>
           </div>
         ))}
-        <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-4">
-          <div className="text-[11px] text-[var(--muted)]">{businessBoundary.label}</div>
-          <div className="num text-2xl font-semibold mt-1">{businessBoundary.value}</div>
-          <div className="mt-2"><SourceTag k={businessBoundary.source} /></div>
+        <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
+          <div className="text-[13px] text-[var(--muted)]">{businessBoundary.label}</div>
+          <div className="num text-3xl font-semibold mt-1.5">{businessBoundary.value}</div>
+          <div className="mt-2.5"><SourceTag k={businessBoundary.source} /></div>
         </div>
       </div>
-      <div className="mt-3 text-[12px] text-[var(--muted)] leading-relaxed bg-[var(--panel)] border border-[var(--line)] rounded-xl p-4">
+      <div className="mt-4 text-[14px] text-[var(--muted)] leading-relaxed bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
         {liftBoundary}
       </div>
     </Section>
@@ -187,7 +187,7 @@ function VisibilityExplorer() {
                     <Td className="num">{c.visibility}%</Td><Td className="num">{c.recommendation}%</Td>
                     <Td>{c.position}</Td><Td className="text-[var(--muted)]">{c.leader}</Td>
                     <Td className={`num font-medium ${c.gap < 0 ? "text-[var(--neg)]" : "text-[var(--pos)]"}`}>{c.gap > 0 ? `+${c.gap}` : c.gap}</Td>
-                    <Td><span className={`text-[11px] font-medium px-2 py-0.5 rounded ${c.priority === "High" ? "bg-[var(--neg-soft)] text-[var(--neg)]" : c.priority === "Med" ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "bg-[var(--line)] text-[var(--muted)]"}`}>{c.priority}</span></Td>
+                    <Td><span className={`text-[13px] font-medium px-2.5 py-1 rounded ${c.priority === "High" ? "bg-[var(--neg-soft)] text-[var(--neg)]" : c.priority === "Med" ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "bg-[var(--line)] text-[var(--muted)]"}`}>{c.priority}</span></Td>
                   </tr>
                 ))}
               </tbody>
@@ -206,7 +206,7 @@ function VisibilityExplorer() {
                   <tr key={r.cluster}>
                     <Td>{r.cluster}</Td>
                     {r.rec.map((v, i) => (
-                      <Td key={i}><span className={`num inline-block min-w-[42px] text-center px-2 py-1 rounded text-xs font-medium ${v < 10 ? "bg-[#0c2a33] text-[#22d3ee]" : v < 25 ? "bg-[#0e3b47] text-[#67e8f9]" : v < 35 ? "bg-[#155e6e] text-white" : "bg-[#22d3ee] text-[#082f3d]"}`}>{v}%</span></Td>
+                      <Td key={i}><span className={`num inline-block min-w-[48px] text-center px-2.5 py-1.5 rounded text-sm font-medium ${v < 10 ? "bg-[#0c2a33] text-[#22d3ee]" : v < 25 ? "bg-[#0e3b47] text-[#67e8f9]" : v < 35 ? "bg-[#155e6e] text-white" : "bg-[#22d3ee] text-[#082f3d]"}`}>{v}%</span></Td>
                     ))}
                   </tr>
                 ))}
@@ -217,11 +217,11 @@ function VisibilityExplorer() {
       </Section>
 
       <Section title="Where you show up in the answer" hint="where you land matters">
-        <div className="grid grid-cols-5 gap-3">
+        <div className="grid grid-cols-5 gap-4">
           {rankDistribution.map((r) => (
-            <div key={r.label} className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-4 text-center">
-              <div className="num text-xl font-semibold">{r.value}%</div>
-              <div className="text-[11px] text-[var(--muted)] mt-1">{r.label}</div>
+            <div key={r.label} className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5 text-center">
+              <div className="num text-2xl font-semibold">{r.value}%</div>
+              <div className="text-[13px] text-[var(--muted)] mt-1.5">{r.label}</div>
             </div>
           ))}
         </div>
@@ -243,7 +243,7 @@ function CitationIntelligence() {
                   <tr key={s.domain} className="hover:bg-[var(--panel-2)]">
                     <Td className="font-medium">{s.domain}</Td><Td className="text-[var(--muted)]">{s.type}</Td>
                     <Td className="num">{s.citations}</Td>
-                    <Td><span className={`text-[11px] font-medium px-2 py-0.5 rounded ${s.support === "Yes" ? "bg-[var(--pos-soft)] text-[var(--pos)]" : s.support === "Partly" ? "bg-[var(--neg-soft)] text-[var(--neg)]" : "bg-[var(--line)] text-[var(--muted)]"}`}>{s.support}</span></Td>
+                    <Td><span className={`text-[13px] font-medium px-2.5 py-1 rounded ${s.support === "Yes" ? "bg-[var(--pos-soft)] text-[var(--pos)]" : s.support === "Partly" ? "bg-[var(--neg-soft)] text-[var(--neg)]" : "bg-[var(--line)] text-[var(--muted)]"}`}>{s.support}</span></Td>
                     <Td className="text-[var(--muted)]">{s.freshness}</Td><Td className="num">{s.persistence}%</Td>
                   </tr>
                 ))}
@@ -254,14 +254,14 @@ function CitationIntelligence() {
       </Section>
 
       <Section title="Does the source back the claim" hint="being cited is not the same as being right">
-        <div className="space-y-2">
+        <div className="space-y-3">
           {claimValidation.map((c) => (
-            <div key={c.claim} className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-4 flex items-start justify-between gap-4">
+            <div key={c.claim} className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5 flex items-start justify-between gap-4">
               <div>
-                <div className="text-[13px]">{c.claim}</div>
-                <div className="text-[11px] text-[var(--muted)] mt-1.5">source cited: <span className="num">{c.source}</span></div>
+                <div className="text-[15px]">{c.claim}</div>
+                <div className="text-[14px] text-[var(--muted)] mt-2">source cited: <span className="num">{c.source}</span></div>
               </div>
-              <span className={`shrink-0 text-[11px] font-medium px-2 py-0.5 rounded ${c.support === "Backed" ? "bg-[var(--pos-soft)] text-[var(--pos)]" : "bg-[var(--neg-soft)] text-[var(--neg)]"}`}>{c.support}</span>
+              <span className={`shrink-0 text-[13px] font-medium px-2.5 py-1 rounded ${c.support === "Backed" ? "bg-[var(--pos-soft)] text-[var(--pos)]" : "bg-[var(--neg-soft)] text-[var(--neg)]"}`}>{c.support}</span>
             </div>
           ))}
         </div>
@@ -274,16 +274,16 @@ function AnswerQuality() {
   return (
     <>
       <Section title="Answer accuracy" hint="three checks, not one number">
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-4">
           {[
             { label: "Facts right", value: "94.2%" },
             { label: "Positioning right", value: "81.5%" },
             { label: "Brand right", value: "91.0%" },
           ].map((a) => (
-            <div key={a.label} className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-4">
-              <div className="text-[11px] text-[var(--muted)]">{a.label}</div>
-              <div className="num text-2xl font-semibold mt-1">{a.value}</div>
-              <div className="mt-2"><SourceTag k="kb" /></div>
+            <div key={a.label} className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
+              <div className="text-[13px] text-[var(--muted)]">{a.label}</div>
+              <div className="num text-3xl font-semibold mt-1.5">{a.value}</div>
+              <div className="mt-2.5"><SourceTag k="kb" /></div>
             </div>
           ))}
         </div>
@@ -298,9 +298,9 @@ function AnswerQuality() {
                 {riskQueue.map((r) => (
                   <tr key={r.issue} className="hover:bg-[var(--panel-2)]">
                     <Td>{r.risk}</Td>
-                    <Td><span className={`text-[11px] font-medium px-2 py-0.5 rounded ${r.severity === "Critical" || r.severity === "High" ? "bg-[var(--neg-soft)] text-[var(--neg)]" : "bg-[var(--line)] text-[var(--muted)]"}`}>{r.severity}</span></Td>
+                    <Td><span className={`text-[13px] font-medium px-2.5 py-1 rounded ${r.severity === "Critical" || r.severity === "High" ? "bg-[var(--neg-soft)] text-[var(--neg)]" : "bg-[var(--line)] text-[var(--muted)]"}`}>{r.severity}</span></Td>
                     <Td>{r.issue}</Td><Td className="text-[var(--muted)]">{r.owner}</Td><Td className="text-[var(--muted)]">{r.status}</Td>
-                    <Td><button className="text-xs font-medium text-[var(--accent)] hover:underline whitespace-nowrap">Review →</button></Td>
+                    <Td><button className="text-sm font-medium text-[var(--accent)] hover:underline whitespace-nowrap">Review →</button></Td>
                   </tr>
                 ))}
               </tbody>
@@ -333,11 +333,11 @@ function CompetitiveLandscape() {
       </Section>
 
       <Section title="Who you compete with, by situation" hint="your real rival changes by situation">
-        <div className="space-y-2">
+        <div className="space-y-3">
           {contextualCompetitors.map((c) => (
-            <div key={c.context} className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-4">
-              <div className="text-[13px] font-medium">{c.context}</div>
-              <div className="text-xs text-[var(--muted)] mt-1">
+            <div key={c.context} className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
+              <div className="text-[15px] font-medium">{c.context}</div>
+              <div className="text-sm text-[var(--muted)] mt-1.5">
                 competitor to watch: <span className="font-medium text-[var(--ink)]">{c.competitor}</span> · {c.why}
               </div>
             </div>
@@ -361,7 +361,7 @@ function ActionsLift() {
                   <tr key={a.action} className="hover:bg-[var(--panel-2)]">
                     <Td className="font-medium">{a.action}</Td><Td className="text-[var(--muted)]">{a.gap}</Td><Td className="text-[var(--muted)]">{a.evidence}</Td>
                     <Td>{a.owner}</Td><Td className="text-[var(--muted)]">{a.agent}</Td>
-                    <Td><span className={`text-[11px] font-medium px-2 py-0.5 rounded ${a.approval === "Approved" ? "bg-[var(--pos-soft)] text-[var(--pos)]" : "bg-[var(--neg-soft)] text-[var(--neg)]"}`}>{a.approval}</span></Td>
+                    <Td><span className={`text-[13px] font-medium px-2.5 py-1 rounded ${a.approval === "Approved" ? "bg-[var(--pos-soft)] text-[var(--pos)]" : "bg-[var(--neg-soft)] text-[var(--neg)]"}`}>{a.approval}</span></Td>
                     <Td className="num">{a.lift}</Td>
                   </tr>
                 ))}
@@ -373,16 +373,16 @@ function ActionsLift() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Section title="What didn't move" hint="learn from what didn't move">
-          <div className="space-y-2">
+          <div className="space-y-3">
             {noImpact.map((n) => (
-              <div key={n.intervention} className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-4 flex items-center justify-between gap-3">
+              <div key={n.intervention} className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5 flex items-center justify-between gap-4">
                 <div>
-                  <div className="text-[13px] font-medium">{n.intervention}</div>
-                  <div className="text-[11px] text-[var(--muted)] mt-0.5">{n.target}</div>
+                  <div className="text-[15px] font-medium">{n.intervention}</div>
+                  <div className="text-[14px] text-[var(--muted)] mt-1">{n.target}</div>
                 </div>
                 <div className="text-right shrink-0">
-                  <span className="text-[11px] bg-[var(--line)] text-[var(--muted)] px-2 py-0.5 rounded">{n.result}</span>
-                  <div className="text-[11px] text-[var(--muted)] mt-1">{n.decision}</div>
+                  <span className="text-[13px] bg-[var(--line)] text-[var(--muted)] px-2.5 py-1 rounded">{n.result}</span>
+                  <div className="text-[14px] text-[var(--muted)] mt-1.5">{n.decision}</div>
                 </div>
               </div>
             ))}
@@ -390,10 +390,10 @@ function ActionsLift() {
         </Section>
 
         <Section title="Who does the work" hint="one agent per job">
-          <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-4">
-            <div className="flex flex-wrap gap-2">
+          <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
+            <div className="flex flex-wrap gap-2.5">
               {agents.map((a) => (
-                <span key={a} className="text-xs text-[var(--muted)] border border-[var(--line)] px-2.5 py-1 rounded-full">{a}</span>
+                <span key={a} className="text-sm text-[var(--muted)] border border-[var(--line)] px-3 py-1.5 rounded-full">{a}</span>
               ))}
             </div>
           </div>
@@ -444,29 +444,29 @@ function Agent() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-5 right-5 z-30 inline-flex items-center gap-2 bg-[var(--panel)] text-[var(--ink)] border border-[var(--line)] text-sm font-semibold px-4 py-2.5 rounded-full shadow-lg hover:border-[var(--accent)] transition"
+          className="fixed bottom-6 right-6 z-30 inline-flex items-center gap-2 bg-[var(--panel)] text-[var(--ink)] border border-[var(--line)] text-base font-semibold px-5 py-3 rounded-full shadow-lg hover:border-[var(--accent)] transition"
         >
-          <span className="w-2 h-2 rounded-full bg-[var(--accent)]" />
+          <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent)]" />
           Ask <span className="roman">I</span>
         </button>
       )}
 
       {open && (
-        <div className="fixed bottom-5 right-5 z-30 w-[380px] max-h-[76vh] flex flex-col bg-[var(--panel)] border border-[var(--line)] rounded-2xl shadow-2xl overflow-hidden">
-          <div className="px-4 py-3 border-b border-[var(--line)] flex items-center justify-between">
+        <div className="fixed bottom-6 right-6 z-30 w-[400px] max-h-[78vh] flex flex-col bg-[var(--panel)] border border-[var(--line)] rounded-2xl shadow-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-[var(--line)] flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[var(--pos)]" />
-              <span className="text-sm font-semibold">Ask <span className="roman">I</span></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-[var(--pos)]" />
+              <span className="text-base font-semibold">Ask <span className="roman">I</span></span>
             </div>
-            <button onClick={() => setOpen(false)} className="text-[var(--muted)] hover:text-[var(--ink)] text-xl leading-none">×</button>
+            <button onClick={() => setOpen(false)} className="text-[var(--muted)] hover:text-[var(--ink)] text-2xl leading-none">×</button>
           </div>
 
-          <div className="px-4 py-2.5 border-b border-[var(--line)] flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-wider text-[var(--muted)]">You are</span>
+          <div className="px-5 py-3 border-b border-[var(--line)] flex items-center gap-2">
+            <span className="text-[13px] uppercase tracking-wider text-[var(--muted)]">You are</span>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as Role)}
-              className="flex-1 bg-[var(--panel-2)] border border-[var(--line)] rounded-md px-2 py-1.5 text-[13px] text-[var(--ink)] outline-none"
+              className="flex-1 bg-[var(--panel-2)] border border-[var(--line)] rounded-md px-3 py-2 text-[15px] text-[var(--ink)] outline-none"
             >
               {ROLES.map((r) => (
                 <option key={r.key} value={r.key}>{r.label}</option>
@@ -474,28 +474,28 @@ function Agent() {
             </select>
           </div>
 
-          <div className="px-4 py-3 border-b border-[var(--line)] bg-[var(--panel-2)]">
-            <div className="text-[10px] uppercase tracking-wider text-[var(--accent)] font-semibold">For you</div>
-            <div className="text-[13px] font-semibold mt-1 leading-snug">{brief.headline}</div>
-            <ul className="mt-2 space-y-1">
+          <div className="px-5 py-4 border-b border-[var(--line)] bg-[var(--panel-2)]">
+            <div className="text-[13px] uppercase tracking-wider text-[var(--accent)] font-semibold">For you</div>
+            <div className="text-[16px] font-semibold mt-1.5 leading-snug">{brief.headline}</div>
+            <ul className="mt-2.5 space-y-1.5">
               {brief.points.map((p) => (
-                <li key={p} className="text-[12px] text-[var(--muted)] leading-snug flex gap-1.5">
+                <li key={p} className="text-[14px] text-[var(--muted)] leading-snug flex gap-2">
                   <span className="text-[var(--accent)] shrink-0">·</span>{p}
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 max-h-[260px]">
+          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3 max-h-[280px]">
             {messages.length === 0 && (
-              <p className="text-[12px] text-[var(--muted)] leading-relaxed">
+              <p className="text-[14px] text-[var(--muted)] leading-relaxed">
                 Ask about your GEO data — &quot;why the AI recommends you less&quot;, &quot;what&apos;s the biggest issue&quot;, &quot;where the content gap is&quot;.
               </p>
             )}
             {messages.map((m, i) => (
               <div
                 key={i}
-                className={`max-w-[90%] text-[13px] leading-relaxed px-3 py-2 rounded-xl ${
+                className={`max-w-[90%] text-[15px] leading-relaxed px-3.5 py-2.5 rounded-xl ${
                   m.from === "user" ? "ml-auto bg-[var(--accent)] text-[#082f3d]" : "bg-[var(--panel-2)] text-[var(--ink)]"
                 }`}
               >
@@ -511,9 +511,9 @@ function Agent() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && send()}
                 placeholder="Ask about your GEO data…"
-                className="flex-1 bg-[var(--panel-2)] border border-[var(--line)] rounded-lg px-3 py-2 text-[13px] text-[var(--ink)] placeholder:text-[var(--muted)] outline-none focus:border-[var(--accent)]"
+                className="flex-1 bg-[var(--panel-2)] border border-[var(--line)] rounded-lg px-3.5 py-2.5 text-[15px] text-[var(--ink)] placeholder:text-[var(--muted)] outline-none focus:border-[var(--accent)]"
               />
-              <button onClick={send} className="bg-[var(--accent)] text-[#082f3d] text-[13px] font-semibold px-3.5 rounded-lg hover:brightness-110">Send</button>
+              <button onClick={send} className="bg-[var(--accent)] text-[#082f3d] text-[15px] font-semibold px-4 rounded-lg hover:brightness-110">Send</button>
             </div>
           </div>
         </div>
@@ -523,40 +523,52 @@ function Agent() {
 }
 
 export default function Home() {
-  const [showNumbers, setShowNumbers] = useState(false);
+  const [view, setView] = useState<"intelligence" | "numbers">("intelligence");
 
   return (
     <div className="min-h-screen">
       <header className="border-b border-[var(--line)] bg-[var(--panel)] sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto w-full px-6 py-4 flex items-center justify-between flex-wrap gap-3">
+        <div className="max-w-6xl mx-auto w-full px-6 py-5 flex items-center justify-between flex-wrap gap-4">
           <div>
             <div className="flex items-baseline gap-2">
-              <h1 className="text-lg font-semibold tracking-tight">GEO Intelligence</h1>
-              <span className="text-[11px] text-[var(--muted)] font-medium">(<span className="roman">I</span>)</span>
+              <h1 className="text-xl font-semibold tracking-tight">GEO Intelligence</h1>
+              <span className="text-base text-[var(--muted)] font-medium">(<span className="roman">I</span>)</span>
             </div>
-            <p className="text-[12px] text-[var(--muted)] mt-0.5">The decision, not just the numbers.</p>
+            <p className="text-[15px] text-[var(--muted)] mt-1">The decision, not just the numbers.</p>
           </div>
-          <div className="flex gap-2 text-[12px]">
-            <select className="border border-[var(--line)] rounded-md px-2.5 py-1.5 bg-[var(--panel)] text-[var(--ink)]"><option>Market · India</option><option>Market · US</option></select>
-            <select className="border border-[var(--line)] rounded-md px-2.5 py-1.5 bg-[var(--panel)] text-[var(--ink)]"><option>Last 30 days</option><option>Last 90 days</option></select>
-            <span className="ml-1 inline-flex items-center text-[10px] text-[var(--neg)] bg-[var(--neg-soft)] px-2 py-1 rounded-md font-medium">MOCK DATA</span>
+          <div className="flex gap-2 text-sm">
+            <select className="border border-[var(--line)] rounded-md px-3 py-2 bg-[var(--panel)] text-[var(--ink)]"><option>Market · India</option><option>Market · US</option></select>
+            <select className="border border-[var(--line)] rounded-md px-3 py-2 bg-[var(--panel)] text-[var(--ink)]"><option>Last 30 days</option><option>Last 90 days</option></select>
+            <span className="ml-1 inline-flex items-center text-[13px] text-[var(--neg)] bg-[var(--neg-soft)] px-2.5 py-1.5 rounded-md font-medium">MOCK DATA</span>
           </div>
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto w-full px-6 py-6">
-        <WhatToDo />
-        <WhyItMatters />
-        <DidItMove />
+      <nav className="border-b border-[var(--line)] bg-[var(--paper)] sticky top-[73px] z-10">
+        <div className="max-w-6xl mx-auto w-full px-6 flex items-center gap-8">
+          <button
+            onClick={() => setView("intelligence")}
+            className={`py-3.5 text-base font-medium border-b-2 -mb-px transition ${view === "intelligence" ? "border-[var(--accent)] text-[var(--ink)]" : "border-transparent text-[var(--muted)] hover:text-[var(--ink)]"}`}
+          >
+            Intelligence
+          </button>
+          <button
+            onClick={() => setView("numbers")}
+            className={`py-3.5 text-base font-medium border-b-2 -mb-px transition ${view === "numbers" ? "border-[var(--accent)] text-[var(--ink)]" : "border-transparent text-[var(--muted)] hover:text-[var(--ink)]"}`}
+          >
+            Numbers
+          </button>
+        </div>
+      </nav>
 
-        <button
-          onClick={() => setShowNumbers(!showNumbers)}
-          className="w-full text-[13px] font-medium text-[var(--accent)] border border-[var(--line)] rounded-xl py-3 hover:bg-[var(--panel-2)]"
-        >
-          {showNumbers ? "Hide the numbers" : "See the numbers behind this"}
-        </button>
-
-        {showNumbers && (
+      <main className="max-w-6xl mx-auto w-full px-6 py-8">
+        {view === "intelligence" ? (
+          <>
+            <WhatToDo />
+            <WhyItMatters />
+            <DidItMove />
+          </>
+        ) : (
           <>
             <VisibilityExplorer />
             <CitationIntelligence />
