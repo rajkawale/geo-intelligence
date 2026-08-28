@@ -519,120 +519,6 @@ function Agent() {
   );
 }
 
-function Analysis() {
-  const tasks = [
-    { n: "1", title: "Resource gap analysis", desc: "Compare the business PRD, the dashboard user stories, and the prototype to find what is missing." },
-    { n: "2", title: "Feature and dashboard justification", desc: "For each feature, decide keep, change, add, or remove, with the reason." },
-    { n: "3", title: "Data and implementation + prototype", desc: "The working prototype and the data strategy behind it." },
-  ];
-
-  const threeQuestions = [
-    { n: "1", q: "What happened", desc: "Measure the number: visibility is 42% in India." },
-    { n: "2", q: "Where / for whom", desc: "Understand the gap: HCP treatment-selection questions are weaker than Mounjaro." },
-    { n: "3", q: "So what", desc: "The business meaning: is this an important decision point, and would fixing it matter?" },
-  ];
-
-  const gaps = [
-    { code: "01", gap: "Signal → meaning", desc: "Metrics exist; the relationship between them and the leakage is not explicit." },
-    { code: "02", gap: "Signal → user behaviour", desc: "Intent taxonomy exists; observed patient and HCP behaviour is not established." },
-    { code: "03", gap: "Signal → market evolution", desc: "Markets can be filtered; changing demand is not a defined analytical layer." },
-    { code: "04", gap: "Signal → recommendation", desc: "Recommendations exist; the evidence for why one outranks another is not explicit." },
-    { code: "05", gap: "Signal → business outcome", desc: "AI Referral Conversion exists; the downstream chain and boundary are unresolved." },
-    { code: "06", gap: "Signal → changing environment", desc: "Separate a real brand change from a changing measurement environment." },
-  ];
-
-  const layers = [
-    { layer: "Market", desc: "AI demand, market priority, molecule, indication, lifecycle, country" },
-    { layer: "Users", desc: "Observed AI questions, persona, information need, intent, journey stage" },
-    { layer: "Competitors", desc: "Relevant alternatives, recommendation position, source authority" },
-    { layer: "Business", desc: "Referral to decision-path movement to a business measure" },
-  ];
-
-  return (
-    <>
-      <Section title="The task" hint="what Amiyangsu asked for">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {tasks.map((t) => (
-            <div key={t.n} className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
-              <div className="num text-sm font-bold text-[var(--accent)]">{t.n}</div>
-              <div className="text-[15px] font-medium mt-2">{t.title}</div>
-              <div className="text-[14px] text-[var(--muted)] mt-1.5 leading-relaxed">{t.desc}</div>
-            </div>
-          ))}
-        </div>
-      </Section>
-
-      <Section title="Phase 1 — resource gap" hint="three sources compared">
-        <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-6">
-          <p className="text-[15px] leading-relaxed">
-            Compared the business PRD, the dashboard user stories, and Amiyangsu's prototype. The PRD defines the metric framework; the user stories define the closed loop (measure, diagnose, act, re-measure). The gap is not another metric. It is the connection from the signal to the business decision.
-          </p>
-        </div>
-      </Section>
-
-      <Section title="Phase 2 — the master question">
-        <div className="bg-[var(--accent-soft)] border border-[var(--line)] rounded-xl p-6">
-          <div className="text-[13px] uppercase tracking-wider text-[var(--accent)] font-semibold mb-2">Master question</div>
-          <div className="text-[17px] font-semibold leading-snug">
-            Can we explain how a change in GEO performance connects to changing market opportunity, actual user and HCP behaviour, and competitive position, and ultimately whether the brand is moving toward its business outcome?
-          </div>
-        </div>
-      </Section>
-
-      <Section title="The three questions every feature answers">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {threeQuestions.map((q) => (
-            <div key={q.n} className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
-              <div className="text-[13px] uppercase tracking-wider text-[var(--accent)] font-semibold">{q.n} · {q.q}</div>
-              <div className="text-[14px] text-[var(--muted)] mt-2 leading-relaxed">{q.desc}</div>
-            </div>
-          ))}
-        </div>
-      </Section>
-
-      <Section title="The six gaps">
-        <div className="space-y-2.5">
-          {gaps.map((g) => (
-            <div key={g.code} className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-4 flex gap-4">
-              <span className="num text-sm font-bold text-[var(--accent)] shrink-0">GAP {g.code}</span>
-              <div>
-                <div className="text-[15px] font-medium">{g.gap}</div>
-                <div className="text-[14px] text-[var(--muted)] mt-0.5">{g.desc}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Section>
-
-      <Section title="The four context layers" hint="what turns a number into a decision">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {layers.map((l) => (
-            <div key={l.layer} className="bg-[var(--panel-2)] border border-[var(--line)] rounded-lg p-5">
-              <div className="text-[13px] uppercase tracking-wider text-[var(--accent)] font-semibold">{l.layer}</div>
-              <div className="text-[15px] text-[var(--muted)] mt-2">{l.desc}</div>
-            </div>
-          ))}
-        </div>
-      </Section>
-
-      <Section title="Decision system vs metric dashboard">
-        <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead><tr><Th> </Th><Th>Metric dashboard</Th><Th>Decision system</Th></tr></thead>
-              <tbody>
-                <tr><Td className="font-medium">Center of the screen</Td><Td>The metrics</Td><Td>The so what</Td></tr>
-                <tr><Td className="font-medium">Answers</Td><Td>What happened, where</Td><Td>What to do, and why this first</Td></tr>
-                <tr><Td className="font-medium">What a manager does</Td><Td>Reads, then decides</Td><Td>Reads, then acts</Td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </Section>
-    </>
-  );
-}
-
 export default function Home() {
   const [view, setView] = useState("overview");
 
@@ -644,7 +530,6 @@ export default function Home() {
     { key: "quality", label: "Answer quality" },
     { key: "actions", label: "Actions" },
     { key: "sources", label: "Data sources" },
-    { key: "analysis", label: "Analysis" },
   ];
 
   return (
@@ -654,7 +539,8 @@ export default function Home() {
           <div>
             <h1 className="text-xl font-semibold tracking-tight">GEO Intelligence</h1>
           </div>
-          <div className="flex gap-2 text-sm">
+          <div className="flex gap-2 text-sm items-center">
+            <a href="/analysis" className="text-[var(--accent)] hover:underline">Phase 1 &amp; 2</a>
             <select className="border border-[var(--line)] rounded-md px-3 py-2 bg-[var(--panel)] text-[var(--ink)]"><option>Market · India</option><option>Market · US</option><option>Market · UK</option><option>Market · EU</option><option>Market · Global</option></select>
             <select className="border border-[var(--line)] rounded-md px-3 py-2 bg-[var(--panel)] text-[var(--ink)]"><option>Last 30 days</option><option>Last 90 days</option></select>
             <span className="ml-1 inline-flex items-center text-[13px] text-[var(--neg)] bg-[var(--neg-soft)] px-2.5 py-1.5 rounded-md font-medium">MOCK DATA</span>
@@ -690,7 +576,6 @@ export default function Home() {
         {view === "quality" && <AnswerQuality />}
         {view === "actions" && <ActionsLift />}
         {view === "sources" && <DataAndSources />}
-        {view === "analysis" && <Analysis />}
       </main>
 
       <Agent />
