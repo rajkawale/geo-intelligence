@@ -1,0 +1,22 @@
+# env — never commit secrets
+.env
+.env.local
+.env.*.local
+backend/.env
+
+# deps
+node_modules/
+
+# build output
+.next/
+out/
+dist/
+build/
+.turbo/
+
+# vercel
+.vercel/
+
+# misc
+.DS_Store
+*.pem

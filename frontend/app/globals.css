@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #e7ecf3;
+  --muted: #8a97ad;
+  --paper: #0e1420;
+  --panel: #161d2b;
+  --panel-2: #1c2536;
+  --accent: #22d3ee;
+  --accent-soft: #0c2a33;
+  --pos: #34d399;
+  --pos-soft: #0b2b22;
+  --neg: #f59e0b;
+  --neg-soft: #2d2310;
+  --line: #1e2635;
+  --mono: ui-monospace, "SFMono-Regular", "JetBrains Mono", Menlo, monospace;
+  --sans: -apple-system, "Segoe UI", Inter, system-ui, sans-serif;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Data (numbers, sources, prompts) reads in mono — the instrument's dial face. */
+.num,
+.provenance {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The provenance tag: every number carries where it comes from. */
+.provenance {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  color: var(--muted);
+  background: var(--line);
+}
+.provenance .dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: currentColor;
+}
+.provenance.third-party { color: #22d3ee; background: #0c2a33; }
+.provenance.internal { color: #a78bfa; background: #241b3d; }
+.provenance.api { color: #fb923c; background: #2d1f10; }
+
+/* Signal meter for the health score — segmented, not a generic ring. */
+.signal {
+  display: flex;
+  gap: 3px;
+}
+.signal .seg {
+  width: 10px;
+  height: 26px;
+  border-radius: 2px;
+  background: var(--line);
+}
+.signal .seg.on { background: var(--accent); }
+.signal .seg.on.warn { background: var(--neg); }
+
+::selection {
+  background: var(--accent-soft);
+}
+
+/* The product's "I" — a serif so it reads as a letter, not a vertical bar. */
+.roman {
+  font-family: ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif;
+}
