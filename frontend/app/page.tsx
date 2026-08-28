@@ -523,21 +523,27 @@ function Agent() {
 }
 
 export default function Home() {
-  const [view, setView] = useState<"intelligence" | "numbers">("intelligence");
+  const [view, setView] = useState("overview");
+
+  const navItems = [
+    { key: "overview", label: "Overview" },
+    { key: "visibility", label: "Visibility" },
+    { key: "citations", label: "Citations" },
+    { key: "competitors", label: "Competitors" },
+    { key: "quality", label: "Answer quality" },
+    { key: "actions", label: "Actions" },
+    { key: "sources", label: "Data sources" },
+  ];
 
   return (
     <div className="min-h-screen">
       <header className="border-b border-[var(--line)] bg-[var(--panel)] sticky top-0 z-10">
         <div className="max-w-6xl mx-auto w-full px-6 py-5 flex items-center justify-between flex-wrap gap-4">
           <div>
-            <div className="flex items-baseline gap-2">
-              <h1 className="text-xl font-semibold tracking-tight">GEO Intelligence</h1>
-              <span className="text-base text-[var(--muted)] font-medium">(<span className="roman">I</span>)</span>
-            </div>
-            <p className="text-[15px] text-[var(--muted)] mt-1">The decision, not just the numbers.</p>
+            <h1 className="text-xl font-semibold tracking-tight">GEO Intelligence</h1>
           </div>
           <div className="flex gap-2 text-sm">
-            <select className="border border-[var(--line)] rounded-md px-3 py-2 bg-[var(--panel)] text-[var(--ink)]"><option>Market · India</option><option>Market · US</option></select>
+            <select className="border border-[var(--line)] rounded-md px-3 py-2 bg-[var(--panel)] text-[var(--ink)]"><option>Market · India</option><option>Market · US</option><option>Market · UK</option><option>Market · EU</option><option>Market · Global</option></select>
             <select className="border border-[var(--line)] rounded-md px-3 py-2 bg-[var(--panel)] text-[var(--ink)]"><option>Last 30 days</option><option>Last 90 days</option></select>
             <span className="ml-1 inline-flex items-center text-[13px] text-[var(--neg)] bg-[var(--neg-soft)] px-2.5 py-1.5 rounded-md font-medium">MOCK DATA</span>
           </div>
@@ -545,39 +551,33 @@ export default function Home() {
       </header>
 
       <nav className="border-b border-[var(--line)] bg-[var(--paper)] sticky top-[73px] z-10">
-        <div className="max-w-6xl mx-auto w-full px-6 flex items-center gap-8">
-          <button
-            onClick={() => setView("intelligence")}
-            className={`py-3.5 text-base font-medium border-b-2 -mb-px transition ${view === "intelligence" ? "border-[var(--accent)] text-[var(--ink)]" : "border-transparent text-[var(--muted)] hover:text-[var(--ink)]"}`}
-          >
-            Intelligence
-          </button>
-          <button
-            onClick={() => setView("numbers")}
-            className={`py-3.5 text-base font-medium border-b-2 -mb-px transition ${view === "numbers" ? "border-[var(--accent)] text-[var(--ink)]" : "border-transparent text-[var(--muted)] hover:text-[var(--ink)]"}`}
-          >
-            Numbers
-          </button>
+        <div className="max-w-6xl mx-auto w-full px-6 flex items-center gap-7 flex-wrap">
+          {navItems.map((item) => (
+            <button
+              key={item.key}
+              onClick={() => setView(item.key)}
+              className={`py-3.5 text-base font-medium border-b-2 -mb-px transition ${view === item.key ? "border-[var(--accent)] text-[var(--ink)]" : "border-transparent text-[var(--muted)] hover:text-[var(--ink)]"}`}
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
       </nav>
 
       <main className="max-w-6xl mx-auto w-full px-6 py-8">
-        {view === "intelligence" ? (
+        {view === "overview" && (
           <>
             <WhatToDo />
             <WhyItMatters />
             <DidItMove />
           </>
-        ) : (
-          <>
-            <VisibilityExplorer />
-            <CitationIntelligence />
-            <AnswerQuality />
-            <CompetitiveLandscape />
-            <ActionsLift />
-            <DataAndSources />
-          </>
         )}
+        {view === "visibility" && <VisibilityExplorer />}
+        {view === "citations" && <CitationIntelligence />}
+        {view === "competitors" && <CompetitiveLandscape />}
+        {view === "quality" && <AnswerQuality />}
+        {view === "actions" && <ActionsLift />}
+        {view === "sources" && <DataAndSources />}
       </main>
 
       <Agent />

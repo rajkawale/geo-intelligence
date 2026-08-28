@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GEO Analytics | Discussion with Amiyangsu — v4</title>
+<style>
+:root{
+  --ink:#172033; --muted:#667085; --line:#d9dee7; --blue:#1d4ed8;
+  --blue2:#eef4ff; --navy:#101828; --green:#087443; --green2:#ecfdf3;
+  --amber:#9a6700; --amber2:#fff8e1; --red:#b42318; --red2:#fff1f0;
+  --paper:#fff; --bg:#f4f6f9;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--ink);line-height:1.45}
+.page{max-width:1180px;margin:28px auto;background:var(--paper);box-shadow:0 8px 30px rgba(16,24,40,.08)}
+header{padding:48px 58px 38px;background:var(--navy);color:#fff}
+.kicker{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#98a2b3;font-weight:800}
+h1{font-size:42px;line-height:1.05;letter-spacing:-.035em;margin:13px 0 12px;max-width:920px}
+.subtitle{font-size:17px;color:#d0d5dd;max-width:850px}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.pill{border:1px solid #344054;border-radius:999px;padding:5px 9px;font-size:11px;color:#d0d5dd}
+main{padding:0 58px 50px}
+section{padding:40px 0;border-bottom:1px solid var(--line)}
+section:last-child{border-bottom:0}
+.phase{display:inline-block;background:var(--blue2);color:var(--blue);padding:5px 9px;border-radius:999px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:900}
+h2{font-size:27px;line-height:1.15;letter-spacing:-.025em;margin:10px 0 7px}
+h3{font-size:18px;margin:24px 0 8px}
+.lead{font-size:16px;color:#344054;max-width:940px}
+.callout{padding:16px 18px;border:1px solid var(--line);border-left:4px solid var(--blue);background:#f8fafc;border-radius:7px;margin:18px 0}
+.callout.green{border-left-color:var(--green);background:var(--green2)}
+.callout.amber{border-left-color:#f79009;background:var(--amber2)}
+.callout.red{border-left-color:var(--red);background:var(--red2)}
+.pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin:22px 0}
+.node{min-height:108px;padding:15px 13px;border:1px solid var(--line);background:#fff}
+.node:not(:first-child){border-left:0}
+.node b{display:block;font-size:13px}
+.node small{display:block;color:var(--muted);font-size:11px;margin-top:5px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:8px;padding:16px;background:#fff}
+.card b{display:block;font-size:14px}
+.card p{margin:6px 0 0;color:#475467;font-size:13px}
+.tag{display:inline-block;font-size:9px;letter-spacing:.09em;font-weight:900;color:var(--blue);background:var(--blue2);padding:4px 6px;border-radius:4px;margin-bottom:8px}
+table{width:100%;border-collapse:collapse;margin:18px 0;font-size:12.5px}
+th,td{border:1px solid var(--line);padding:11px 12px;text-align:left;vertical-align:top}
+th{background:#f8f9fb;font-size:10px;letter-spacing:.05em;text-transform:uppercase}
+.q{font-weight:850;font-size:15px;line-height:1.3}
+.evidence{font-size:11px;color:var(--muted);margin-top:8px}
+.beforeafter{display:grid;grid-template-columns:1fr 42px 1fr;align-items:stretch;gap:10px;margin:20px 0}
+.ba{border:1px solid var(--line);border-radius:9px;padding:17px}
+.ba h3{margin:0 0 9px}
+.before{background:#f8fafc}
+.after{background:#fff8e6;border-color:#f1d59c}
+.arrow{display:flex;align-items:center;justify-content:center;font-size:24px;color:#98a2b3}
+.data-layers{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.layer{border-top:4px solid var(--blue);background:#f8fafc;padding:15px}
+.layer b{display:block;font-size:14px}
+.layer span{display:block;color:#475467;font-size:12px;margin-top:5px}
+.master{background:var(--navy);color:#fff;border-radius:10px;padding:24px 26px;margin:20px 0}
+.master .label{font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:#98a2b3;font-weight:900}
+.master .big{font-size:25px;line-height:1.25;font-weight:850;margin-top:8px}
+.master em{color:#a7c7ff;font-style:normal}
+.alt{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.alt .card{min-height:155px}
+.answer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.ask{background:var(--navy);color:#fff;border-radius:9px;padding:21px 23px}
+.ask b{display:block;color:#98a2b3;font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px}
+.ask p{font-size:17px;font-weight:800;margin:0;line-height:1.3}
+.num{font-size:10px;letter-spacing:.1em;color:var(--blue);font-weight:900;margin-bottom:7px}
+footer{padding:22px 58px;background:#f7f8fa;color:#667085;font-size:11px}
+@media(max-width:850px){
+  .page{margin:0}.pipeline,.grid,.data-layers,.alt,.answer-grid{grid-template-columns:1fr}
+  .node:not(:first-child){border-left:1px solid var(--line);border-top:0}
+  header,main,footer{padding-left:24px;padding-right:24px}
+  h1{font-size:34px}.beforeafter{grid-template-columns:1fr}.arrow{height:26px;transform:rotate(90deg)}
+}
+@media print{
+  body{background:#fff}.page{margin:0;box-shadow:none;max-width:none}
+  header,main,footer{padding-left:35px;padding-right:35px}
+  section{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <div class="kicker">GEO Analytics · discussion document · August 2026</div>
+  <h1>What can GEO tell a brand today — and where does the business answer stop?</h1>
+  <div class="subtitle">
+    <b style="color:#a7c7ff">Raj · Product discussion</b><br>
+    Review of the business PRD, Amiyangsu's prototype, the dashboard user stories and the August market research.
+    The discussion starts with what is already covered, then tests the unanswered question before discussing product scope.
+  </div>
+  <div class="meta">
+    <span class="pill">Business PRD v3</span>
+    <span class="pill">Amiyangsu prototype</span>
+    <span class="pill">Dashboard user stories</span>
+    <span class="pill">August 2026 market research</span>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <span class="phase">Phase 1 · What is already covered</span>
+  <h2>The current material gives a strong view of what is happening in AI answers</h2>
+  <p class="lead">
+    The PRD and user stories already cover the measurement and intervention loop:
+    visibility, recommendation, citation, position, competitor gaps, evidence, actions and GEO-level lift.
+  </p>
+
+  <div class="pipeline">
+    <div class="node"><b>Measure</b><small>Visibility · citation · recommendation · position · accuracy</small></div>
+    <div class="node"><b>Diagnose</b><small>Prompt · answer · source · risk</small></div>
+    <div class="node"><b>Compare</b><small>Competitor · gap · citation authority</small></div>
+    <div class="node"><b>Act</b><small>Priority · owner · intervention · approval</small></div>
+    <div class="node"><b>Re-measure</b><small>Visibility · citation · accuracy · position lift</small></div>
+  </div>
+
+  <div class="grid">
+    <div class="card"><span class="tag">EXAMPLE</span><b>“Brand A has 42% visibility.”</b><p>The dashboard can show where that number comes from — market, engine, intent, journey stage and prompt.</p></div>
+    <div class="card"><span class="tag">EXAMPLE</span><b>“Competitor B leads this cluster.”</b><p>The product can show the competitor gap, recommendation rate, citations and underlying answers.</p></div>
+    <div class="card"><span class="tag">EXAMPLE</span><b>“We changed something and GEO moved.”</b><p>The action model can compare baseline and post-intervention GEO performance.</p></div>
+  </div>
+
+  <div class="callout green">
+    <b>So the current answer is:</b><br>
+    What is happening in AI answers → where is the GEO gap → what evidence sits behind it →
+    what action was taken → did the GEO metric move?
+  </div>
+
+  <p class="evidence">
+    Source basis: the dashboard user stories define the product as Measure → Diagnose → Prioritize → Act → Re-measure → Prove lift,
+    including KPI drilldown, competitive gaps, actions and intervention lift.
+  </p>
+</section>
+
+<section>
+  <span class="phase">Phase 2 · Where the answer stops</span>
+  <h2>The missing question is not another number. It is what the number means for the business.</h2>
+  <p class="lead">
+    The current material can tell us that a GEO signal is weak, that a competitor is ahead, and even produce a recommendation.
+    It does not yet establish whether that signal represents a meaningful business opportunity — or whether the brand actually moved closer to its intended outcome.
+  </p>
+
+  <div class="grid">
+    <div class="card">
+      <span class="tag">1 · WHAT HAPPENED?</span>
+      <b>Measure the number</b>
+      <p>Example: “Visibility is 42% in India.”</p>
+    </div>
+    <div class="card">
+      <span class="tag">2 · WHERE / FOR WHOM?</span>
+      <b>Understand the gap</b>
+      <p>Example: “HCP treatment-selection questions are weaker than Competitor B.”</p>
+    </div>
+    <div class="card">
+      <span class="tag">3 · SO WHAT?</span>
+      <b>Understand the business meaning</b>
+      <p>Example: “Is this an important decision point for this molecule, and would fixing it matter?”</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <b>The current product gets us strongly through the first two questions.</b><br>
+    The gap I want to explore is the third: <b>what does this mean for the user, the market and the brand?</b>
+  </div>
+
+  <table>
+    <tr>
+      <th style="width:28%">Question we need to answer</th>
+      <th style="width:34%">What the current material can answer</th>
+      <th>What remains unresolved</th>
+    </tr>
+    <tr>
+      <td><div class="q">Where is the leakage?</div></td>
+      <td>42% visibility, 28% recommendation, competitor B at 51%, citation gap of 12 points.</td>
+      <td>Is this actually a valuable leakage point, or is it a low-demand / low-priority area?</td>
+    </tr>
+    <tr>
+      <td><div class="q">Why does this gap matter?</div></td>
+      <td>The answer can show prompt, intent, journey stage, citations, sources and competitor evidence.</td>
+      <td>Does this represent an important patient/HCP information need or a meaningful decision point?</td>
+    </tr>
+    <tr>
+      <td><div class="q">Why is competitor B winning?</div></td>
+      <td>It can show that B is more visible, recommended or cited.</td>
+      <td>Is B the relevant alternative for this molecule, indication, lifecycle stage, audience and country — and what is giving B the advantage?</td>
+    </tr>
+    <tr>
+      <td><div class="q">What should the recommendation engine recommend?</div></td>
+      <td>It can turn a detected gap into an action and route work to GEO capabilities.</td>
+      <td>What evidence makes this the right action for this business priority, now? What expected effect are we trying to influence?</td>
+    </tr>
+    <tr>
+      <td><div class="q">Did the intervention improve the GEO position?</div></td>
+      <td>Baseline and post-intervention visibility, citation, accuracy and position lift can be measured.</td>
+      <td>Did that GEO movement change anything in the user's decision path or market position?</td>
+    </tr>
+    <tr>
+      <td><div class="q">Did the brand move closer to its business outcome?</div></td>
+      <td>AI Referral Conversion is already a dashboard KPI, and AI-influenced pipeline attribution is listed as a P2 capability.</td>
+      <td><b>What does the referral represent in the molecule's decision path, what downstream business outcome matters, and what evidence connects the two?</b></td>
+    </tr>
+  </table>
+
+  <div class="callout amber">
+    <b>This is the boundary I want to test:</b><br>
+    The current product can measure <em>GEO lift</em>. The unresolved question is whether it can explain the
+    <em>meaning of that lift</em> across user behaviour, market context and the brand's business outcome —
+    without claiming causality that the data cannot support.
+  </div>
+
+
+  <h3>The gap is broader than business outcome</h3>
+  <p class="lead">
+    Reviewing the PRD, user stories and research together, the missing layer is not one feature.
+    Several pieces of context exist as filters or metrics, but the product does not yet define how they
+    become evidence for a business decision.
+  </p>
+
+  <table>
+    <tr>
+      <th>Dimension</th>
+      <th>What exists today</th>
+      <th>What is still missing as an analytical question</th>
+    </tr>
+    <tr>
+      <td><div class="q">How the numbers connect</div></td>
+      <td>Visibility, citation, recommendation, position, accuracy and trends can be measured and drilled into.</td>
+      <td><b>How do these numbers connect?</b> For example, when citation rises but recommendation does not, what does that tell us about the brand's position in the answer?</td>
+    </tr>
+    <tr>
+      <td><div class="q">What users are doing</div></td>
+      <td>Intent, journey stage, branded/unbranded prompts and AI Referral Conversion are represented.</td>
+      <td><b>What are patients/HCPs actually asking? Are they using AI at this point? And did their behaviour change?</b> Prompt configuration is not the same as observed user behaviour.</td>
+    </tr>
+    <tr>
+      <td><div class="q">How the market is changing</div></td>
+      <td>Market and country filters, trends, lifecycle/intent dimensions and a P2 cross-market narrative are present.</td>
+      <td><b>How is the market changing?</b> Is AI demand growing, shifting to different questions, changing by lifecycle stage, or changing the relevant competitive set? A static market filter does not answer market evolution.</td>
+    </tr>
+    <tr>
+      <td><div class="q">Understanding the competitor</div></td>
+      <td>Competitor visibility, citation share, recommendation rate, answer position and source ownership are measurable.</td>
+      <td><b>Which competitor really matters here, and why are they doing better?</b> The answer requires molecule × indication × lifecycle × audience × country context.</td>
+    </tr>
+    <tr>
+      <td><div class="q">Why this action?</div></td>
+      <td>The recommendation/action layer can prioritize gaps, assign owners/agents and store expected/actual lift.</td>
+      <td><b>Why is this the right thing to act on?</b> What business context, evidence and expected downstream effect justify prioritizing it over another gap?</td>
+    </tr>
+    <tr>
+      <td><div class="q">Did the business move?</div></td>
+      <td>AI Referral Conversion is a KPI; AI-influenced pipeline attribution is explicitly a P2 capability.</td>
+      <td><b>What business result are we trying to move, and what evidence shows the brand moved closer to it?</b> The current MVP definition stops at measured GEO intervention outcomes.</td>
+    </tr>
+  </table>
+
+  <div class="callout red">
+    <b>The common pattern:</b> the product has many of the ingredients — metrics, filters, competitors, prompts, recommendations and lift —
+    but the current definition does not explicitly model the <em>relationships between those ingredients and the downstream business decision</em>.
+  </div>
+
+  <p class="evidence">
+    Source basis: the user stories explicitly provide intent/journey-stage taxonomy, market and competitor configuration,
+    GEO KPI drilldown, recommendations/actions and intervention lift. The research adds the unresolved questions around
+    real AI-user demand, contextual competitors, changing AI behaviour and causal limits.
+  </p>
+</section>
+
+<section>
+  <span class="phase">Phase 2 · One example</span>
+  <h2>Same GEO problem. Two very different business decisions.</h2>
+  <p class="lead">
+    A low GEO number does not automatically mean “fix it now.” We need to understand what is behind the number before deciding whether it is a real business opportunity.
+  </p>
+
+  <div class="beforeafter">
+    <div class="ba before">
+      <h3>Example A · A weak number</h3>
+      <p><b>What we see:</b><br>
+      Brand A has 42% visibility in India.</p>
+
+      <p><b>What the dashboard can show:</b><br>
+      The prompts where visibility is low, the journey stage, the competitor, the sources and the GEO metrics.</p>
+
+      <p><b>What we still need to know:</b></p>
+      <ul>
+        <li>Are people actually asking these questions often?</li>
+        <li>Is this an important decision point for this molecule?</li>
+        <li>Is India an important market for this brand?</li>
+        <li>Is the competitor winning something that matters?</li>
+      </ul>
+
+      <p><b>Possible decision:</b> this may be a low-priority GEO gap.</p>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="ba after">
+      <h3>Example B · Same number, different meaning</h3>
+      <p><b>What we see:</b><br>
+      Brand A also has 42% visibility in another market.</p>
+
+      <p><b>But the context is different:</b><br>
+      This is a high-priority market. The questions are around treatment selection. The audience is important to the brand. Competitor B is being recommended more often.</p>
+
+      <p><b>Now the questions become:</b></p>
+      <ul>
+        <li>Why is Competitor B winning these answers?</li>
+        <li>What information is the user looking for?</li>
+        <li>Is our brand missing from an important decision point?</li>
+        <li>If we improve this GEO gap, what user or business outcome are we trying to influence?</li>
+      </ul>
+
+      <p><b>Possible decision:</b> this could be a high-priority opportunity.</p>
+    </div>
+  </div>
+
+  <div class="callout amber">
+    <b>This is the gap:</b><br>
+    The number <b>42%</b> is not enough to tell us which problem deserves attention.
+    The product needs to help connect the GEO number with <b>market importance, user need, competitive position and the business goal</b>.
+  </div>
+
+  <h3>Why this matters for the recommendation engine</h3>
+  <div class="callout">
+    The recommendation engine can already say <b>“fix this GEO gap.”</b><br><br>
+    The deeper question is: <b>“Why should we fix this gap before the other gaps?”</b><br><br>
+    That answer needs evidence about the market, the user, the competitor and the business priority — not just the size of the GEO gap.
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <span class="tag">CURRENT ANSWER</span>
+      <b>“Where are we weak?”</b>
+      <p>42% visibility in this market / prompt group / journey stage.</p>
+    </div>
+    <div class="card">
+      <span class="tag">NEXT QUESTION</span>
+      <b>“Why does this weakness matter?”</b>
+      <p>Is this an important user need, market and competitive opportunity?</p>
+    </div>
+    <div class="card">
+      <span class="tag">BUSINESS QUESTION</span>
+      <b>“What would success change?”</b>
+      <p>If we fix it, what user behaviour or business result are we trying to move?</p>
+    </div>
+  </div>
+
+  <p class="evidence">
+    The examples are illustrative. The point is to show why the same GEO metric can lead to different priorities when the market, user and business context changes.
+  </p>
+</section>
+
+<section>
+  <span class="phase">Phase 3 · What evidence is missing</span>
+  <h2>To interpret the GEO signal, we need context around it</h2>
+
+  <div class="data-layers">
+    <div class="layer">
+      <b>1 · Market</b>
+      <span>AI demand · market priority · molecule · indication · lifecycle · country · market change</span>
+    </div>
+    <div class="layer">
+      <b>2 · What users are doing</b>
+      <span>Observed AI questions · persona · information need · intent · journey stage · adoption / decision signals</span>
+    </div>
+    <div class="layer">
+      <b>3 · Competitors</b>
+      <span>Relevant alternatives · recommendation position · source authority · why the competitor wins</span>
+    </div>
+    <div class="layer">
+      <b>4 · Did the business move?</b>
+      <span>Referral / engagement → decision-path movement → molecule-specific business measure</span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card"><span class="tag">RESEARCH SIGNAL</span><b>Visibility ≠ influence</b><p>A brand can be cited while another brand is recommended. A visibility number alone does not tell us who is winning the answer.</p></div>
+    <div class="card"><span class="tag">RESEARCH SIGNAL</span><b>Tracked prompts ≠ actual demand</b><p>Real-user prompt research raises the question of whether our configured prompt universe reflects what patients and HCPs are actually asking.</p></div>
+    <div class="card"><span class="tag">RESEARCH SIGNAL</span><b>Competitor ≠ fixed list</b><p>Competitive relevance can change by molecule, indication, lifecycle stage, audience and country.</p></div>
+    <div class="card"><span class="tag">RESEARCH SIGNAL</span><b>Movement ≠ causality</b><p>Observed AI changes can also reflect demand shifts, content changes, model changes and refresh cycles.</p></div>
+    <div class="card"><span class="tag">BUSINESS QUESTION</span><b>User decision matters</b><p>The relevant outcome may sit behind patient choice, HCP choice, access, initiation, adherence or another molecule-specific business measure.</p></div>
+    <div class="card"><span class="tag">BUSINESS QUESTION</span><b>Priority matters</b><p>The same GEO gap should not automatically receive the same investment across markets, intents or journey stages.</p></div>
+  </div>
+
+  <div class="beforeafter">
+    <div class="ba before">
+      <h3>What the current product largely does</h3>
+      <p><b>Market:</b> India · <b>Intent:</b> treatment selection · <b>Stage:</b> consideration</p>
+      <p><b>GEO:</b> 42% visibility · 31% citation · 18% recommendation</p>
+      <p><b>Competitor:</b> Brand B leads recommendation</p>
+      <p><b>Action:</b> improve the relevant source/content</p>
+      <p><b>Lift:</b> visibility +8 points after intervention</p>
+    </div>
+    <div class="arrow">→</div>
+    <div class="ba after">
+      <h3>The business question still left open</h3>
+      <p>Is treatment-selection AI demand actually growing in this market?</p>
+      <p>Are patients/HCPs using AI for this decision, and are the tracked prompts representative?</p>
+      <p>Why is Brand B winning — evidence, positioning, source authority, or something else?</p>
+      <p>Did the recommendation change because of the intervention?</p>
+      <p>Did the relevant user decision or business measure move?</p>
+    </div>
+  </div>
+
+  <div class="callout amber">
+    <b>Important distinction:</b> a dimension being available as a filter does not mean the product answers the business question behind that dimension.
+    “Market = India” is context. “Why did India become a higher/lower priority for this molecule?” is analysis.
+  </div>
+
+  <h3>What this means for one real example</h3>
+  <div class="callout">
+    <b>Observed:</b> Brand A's citation share moves from 22% → 31%.<br>
+    <b>We can ask:</b> Did this happen on high-demand questions? Did recommendation change? Did the relevant competitor lose position?
+    Did the change occur in a priority market and decision stage? Did the audience behaviour we care about move?
+    <br><br>
+    <b>The point:</b> the 9-point citation increase is useful evidence, but it is not yet the business answer.
+  </div>
+</section>
+
+<section>
+  <span class="phase">Phase 4 · The master question</span>
+  <h2>Can we connect every dot?</h2>
+
+  <div class="master">
+    <div class="label">Master question</div>
+    <div class="big">
+      Can we explain how a change in <em>GEO performance</em> connects to
+      <em>changing market opportunity, actual user/HCP behaviour and competitive position</em> —
+      and ultimately whether the brand is moving toward its <em>business outcome</em>?
+    </div>
+  </div>
+
+  <div class="pipeline">
+    <div class="node"><b>GEO signal</b><small>Visibility · citation · recommendation · position</small></div>
+    <div class="node"><b>Signal relationship</b><small>What moves together? Where is the leakage?</small></div>
+    <div class="node"><b>Market + user context</b><small>Demand · persona · intent · journey · adoption</small></div>
+    <div class="node"><b>Competitive position</b><small>Who matters? Why are they winning?</small></div>
+    <div class="node"><b>Did the business move?</b><small>Did the brand move closer to the intended result?</small></div>
+  </div>
+
+  <div class="callout red">
+    <b>Evidence boundary:</b> this does not mean “GEO causes sales.”
+    It means the product should be able to show the evidence chain, identify where the chain stops,
+    and distinguish observed fact from inference and attribution.
+  </div>
+</section>
+
+<section>
+  <span class="phase">Phase 5 · The alternative question</span>
+  <h2>Do we need GEO Analytics to answer the whole chain?</h2>
+  <p class="lead">
+    Before turning “connect every dot” into a product requirement, there is a more basic question:
+    which part should GEO answer, and which part should come from another system?
+  </p>
+
+  <div class="alt">
+    <div class="card">
+      <b>Option A · Business / CRM / commercial analytics</b>
+      <p>Can answer commercial outcomes and customer behaviour when the required client data exists.</p>
+      <p><b>Limit:</b> it does not explain the AI answer, prompt, citation or competitor mechanism behind the GEO signal.</p>
+    </div>
+    <div class="card">
+      <b>Option B · Market / primary research</b>
+      <p>Can answer user information needs, decision drivers and some behaviour questions.</p>
+      <p><b>Limit:</b> it does not continuously observe how AI engines represent the brand and competitors.</p>
+    </div>
+    <div class="card">
+      <b>Option C · GEO + external business data</b>
+      <p>GEO owns the AI evidence chain and connects it to the market and business evidence needed downstream.</p>
+      <p><b>Question:</b> is this the boundary we actually want?</p>
+    </div>
+  </div>
+
+  <div class="callout amber">
+    <b>Why not answer this elsewhere?</b><br>
+    Because no single existing layer sees the whole chain. Commercial systems can show outcomes but not the AI mechanism;
+    market research can explain needs and behaviour but not continuously observe AI representation; GEO can observe the AI layer
+    but cannot infer downstream business impact from GEO metrics alone. The product boundary therefore needs an explicit handoff,
+    not an assumed end-to-end claim.
+  </div>
+
+  <div class="callout green">
+    <b>The decision before the solution:</b><br>
+    What should GEO Analytics be accountable for explaining, what evidence must come from elsewhere,
+    and where should the handoff occur?
+  </div>
+</section>
+
+<section>
+  <span class="phase">Discussion · 3 questions for business team</span>
+  <h2>Where I would take the conversation</h2>
+
+  <div class="answer-grid">
+    <div class="ask">
+      <b>01 · The gap</b>
+      <p>Do we want GEO Analytics to explain only GEO performance, or the leakage between GEO performance, user behaviour, market context and the business outcome?</p>
+    </div>
+    <div class="ask">
+      <b>02 · The first use case</b>
+      <p>For one molecule, which user decision and business outcome should we trace — and what evidence do we already have for that chain?</p>
+    </div>
+    <div class="ask">
+      <b>03 · The boundary</b>
+      <p>What should GEO own, what must come from market/user/commercial data, and where should the product stop rather than infer?</p>
+    </div>
+  </div>
+
+  <h3>What I would want to leave with</h3>
+  <ul>
+    <li>Agreement on whether the gap is only GEO measurement, or the missing connection to business decisions.</li>
+    <li>A first molecule/use case with a named user decision and business outcome.</li>
+    <li>The evidence chain: GEO → user/market context → competitive position → outcome.</li>
+    <li>The boundary: what GEO can observe, what must come from other systems, and what it must not infer.</li>
+  </ul>
+</section>
+
+<section>
+  <span class="phase">Review conclusion</span>
+  <h2>What I would now call the product gap</h2>
+  <div class="master">
+    <div class="label">Not a missing dashboard metric</div>
+    <div class="big">
+      The current product already has many of the numbers and views we need.
+      The larger gap is whether those signals can be interpreted as a connected
+      <em>decision system</em>: what changed, why it matters, for whom, against whom,
+      what should happen next, and whether the relevant business outcome moved.
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card"><span class="tag">GAP 01</span><b>Signal → meaning</b><p>Metrics exist; the relationship between metrics and the leakage is not yet explicit.</p></div>
+    <div class="card"><span class="tag">GAP 02</span><b>Signal → user behaviour</b><p>Intent and journey-stage taxonomy exist; observed patient/HCP behaviour and AI adoption at the decision point are not established by the current dashboard definition.</p></div>
+    <div class="card"><span class="tag">GAP 03</span><b>Signal → market evolution</b><p>Markets can be filtered and compared; changing AI demand, questions, adoption and competitive context are not yet a defined analytical layer.</p></div>
+    <div class="card"><span class="tag">GAP 04</span><b>Signal → recommendation</b><p>Recommendations exist; the evidence standard for why one opportunity should outrank another needs to be explicit.</p></div>
+    <div class="card"><span class="tag">GAP 05</span><b>Signal → business outcome</b><p>AI Referral Conversion exists as a KPI; the downstream business chain and attribution boundary remain unresolved.</p></div>
+    <div class="card"><span class="tag">GAP 06</span><b>Signal → changing environment</b><p>The research shows AI search behaviour is changing quickly; the product needs a way to distinguish a real brand change from a changing measurement environment.</p></div>
+  </div>
+</section>
+
+<section>
+  <span class="phase">Evidence ledger</span>
+  <h2>What was reviewed</h2>
+  <table>
+    <tr><th>Source</th><th>Used for</th></tr>
+    <tr><td>Business-team GEO Visibility Dashboard PRD v3</td><td>KPI framework, dashboard objective, recommendations, reporting, product success metrics and P2 attribution boundary.</td></tr>
+    <tr><td>GEO Visibility Dashboard user stories & core features</td><td>MVP capabilities and acceptance criteria across Overview, Visibility, Citation, Answer Quality, Competitive Landscape, Actions & Lift and Reports.</td></tr>
+    <tr><td>Amiyangsu-shared dashboard prototype</td><td>Intended experience and current MVP concept; treated as prototype evidence, not production evidence.</td></tr>
+    <tr><td>GEO AI Visibility Dashboard — Market Research, August 2026</td><td>Prompt demand, visibility vs influence, contextual competitors, market prioritisation and attribution limits.</td></tr>
+  </table>
+
+  <div class="callout amber">
+    <b>Presentation stance:</b> I am not presenting a solution in this document.
+    I am using the material already shared to identify the unanswered business question,
+    test whether the gap is real, and clarify what evidence would be required before deciding what to build.
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <b>Flow for the discussion:</b>
+  what is already covered → where the answer stops → concrete leakage example → missing context →
+  master question → alternative boundary → three questions for alignment.
+</footer>
+
+</div>
+</body>
+</html>
