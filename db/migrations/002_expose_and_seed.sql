@@ -21,27 +21,29 @@ notify pgrst, 'reload schema';
 -- ---------------------------------------------------------------------------
 
 grant usage on schema geoi to anon, authenticated, service_role;
-grant select, insert, update, delete on all tables in schema geoi to anon, authenticated, service_role;
-alter default privileges in schema geoi grant select, insert, update, delete on tables to anon, authenticated, service_role;
+-- The public `anon` (browser) key gets no table access. Reads go through the
+-- authenticated role or the backend's service_role, never the public key.
+grant select, insert, update, delete on all tables in schema geoi to authenticated, service_role;
+alter default privileges in schema geoi grant select, insert, update, delete on tables to authenticated, service_role;
 
 -- ---------------------------------------------------------------------------
 -- 3. Demo read policy (read-only for the browser role; service_role bypasses RLS)
 --    Replace with real role-based policies (medical vs content) before production.
 -- ---------------------------------------------------------------------------
 
-create policy "demo read" on geoi.prompt_clusters    for select using (true);
-create policy "demo read" on geoi.prompts            for select using (true);
-create policy "demo read" on geoi.real_user_prompts  for select using (true);
-create policy "demo read" on geoi.engines            for select using (true);
-create policy "demo read" on geoi.competitors        for select using (true);
-create policy "demo read" on geoi.sources            for select using (true);
-create policy "demo read" on geoi.answers            for select using (true);
-create policy "demo read" on geoi.citations          for select using (true);
-create policy "demo read" on geoi.actions            for select using (true);
-create policy "demo read" on geoi.reviews            for select using (true);
-create policy "demo read" on geoi.knowledge_base     for select using (true);
-create policy "demo read" on geoi.metrics            for select using (true);
-create policy "demo read" on geoi.runs               for select using (true);
+create policy "demo read" on geoi.prompt_clusters    for select to authenticated using (true);
+create policy "demo read" on geoi.prompts            for select to authenticated using (true);
+create policy "demo read" on geoi.real_user_prompts  for select to authenticated using (true);
+create policy "demo read" on geoi.engines            for select to authenticated using (true);
+create policy "demo read" on geoi.competitors        for select to authenticated using (true);
+create policy "demo read" on geoi.sources            for select to authenticated using (true);
+create policy "demo read" on geoi.answers            for select to authenticated using (true);
+create policy "demo read" on geoi.citations          for select to authenticated using (true);
+create policy "demo read" on geoi.actions            for select to authenticated using (true);
+create policy "demo read" on geoi.reviews            for select to authenticated using (true);
+create policy "demo read" on geoi.knowledge_base     for select to authenticated using (true);
+create policy "demo read" on geoi.metrics            for select to authenticated using (true);
+create policy "demo read" on geoi.runs               for select to authenticated using (true);
 
 -- ---------------------------------------------------------------------------
 -- 4. Seed demo data (mirrors frontend/lib/mockData.ts)

@@ -26,10 +26,10 @@ export async function generateStructuredAnswer({ promptText, brand, competitors 
     `User prompt: ${promptText}`,
   ].join('\n');
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
     body: JSON.stringify({ contents: [{ parts: [{ text: instruction }] }] }),
   });
   if (!res.ok) throw new Error(`Gemini call failed: ${res.status}`);
