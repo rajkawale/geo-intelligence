@@ -540,9 +540,7 @@ export default function Home() {
             <h1 className="text-xl font-semibold tracking-tight">GEO Intelligence</h1>
           </div>
           <div className="flex gap-2 text-sm items-center">
-            <a href="/analysis" className="text-[var(--accent)] hover:underline">Phase 1 &amp; 2</a>
-            <select className="border border-[var(--line)] rounded-md px-3 py-2 bg-[var(--panel)] text-[var(--ink)]"><option>Market · India</option><option>Market · US</option><option>Market · UK</option><option>Market · EU</option><option>Market · Global</option></select>
-            <select className="border border-[var(--line)] rounded-md px-3 py-2 bg-[var(--panel)] text-[var(--ink)]"><option>Last 30 days</option><option>Last 90 days</option></select>
+            <a href="/analysis" className="text-[var(--accent)] hover:underline">Gap analysis</a>
             <span className="ml-1 inline-flex items-center text-[13px] text-[var(--neg)] bg-[var(--neg-soft)] px-2.5 py-1.5 rounded-md font-medium">MOCK DATA</span>
           </div>
         </div>
