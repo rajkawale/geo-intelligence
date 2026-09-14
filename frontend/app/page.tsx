@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import ThemeToggle from "@/lib/ThemeToggle";
+import { apiFetch } from "@/lib/api";
 import { SOURCES } from "@/lib/mockData";
 
-const API = process.env.NEXT_PUBLIC_GEOI_API_URL || "http://localhost:4000";
 const REAL_BRANDS = ["Wegovy", "Ozempic", "CagriSema"];
 type GapSummary = Record<string, { won: number; contested: number; lost: number; absent: number; total: number }>;
 type EngineBreakdown = Record<string, { won: number; contested: number; lost: number; absent: number; total: number }>;
@@ -61,8 +61,7 @@ function Section({ title, children }: { title: string; hint?: string; children: 
 // first. Fetches the aggregates automatically; the Gemini call itself is a
 // manual click, same pattern as Ask I, so switching brands doesn't burn a
 // Gemini call nobody asked for.
-function SuggestedFocus() {
-  const [brand, setBrand] = useState("Wegovy");
+function SuggestedFocus({ brand }: { brand: string }) {
   const [summary, setSummary] = useState<GapSummary[string] | null>(null);
   const [engines, setEngines] = useState<EngineBreakdown | null>(null);
   const [competitors, setCompetitors] = useState<CompetitorRow[] | null>(null);
@@ -71,19 +70,31 @@ function SuggestedFocus() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+    setSummary(null);
     setSuggestion(null);
     setError(null);
     Promise.all([
-      fetch(`${API}/api/profound-runs/summary`).then((r) => r.json()),
-      fetch(`${API}/api/profound-runs/by-engine?brand=${brand}`).then((r) => r.json()),
-      fetch(`${API}/api/profound-runs/competitors?brand=${brand}`).then((r) => r.json()),
+      apiFetch(`/api/profound-runs/summary`).then((r) => r.json()),
+      apiFetch(`/api/profound-runs/by-engine?brand=${brand}`).then((r) => r.json()),
+      apiFetch(`/api/profound-runs/competitors?brand=${brand}`).then((r) => r.json()),
     ])
       .then(([summaryData, engineData, competitorData]) => {
+        if (cancelled) return;
         setSummary(summaryData[brand] ?? null);
         setEngines(engineData);
         setCompetitors(competitorData.rows ?? []);
       })
-      .catch(() => setError("Can't reach the backend"));
+      .catch(() => {
+        if (!cancelled) setError("Can't reach the backend");
+      });
+    // A slow brand switch (e.g. the 9-competitor rollup) can resolve after a
+    // later switch's fetch — without this guard the stale response wins and
+    // silently shows the wrong brand's numbers. Caught by testing a fast
+    // brand switch in-browser, not by inspection.
+    return () => {
+      cancelled = true;
+    };
   }, [brand]);
 
   async function generate() {
@@ -91,7 +102,7 @@ function SuggestedFocus() {
     setLoading(true);
     setSuggestion(null);
     try {
-      const res = await fetch(`${API}/api/insight-suggestion`, {
+      const res = await apiFetch(`/api/insight-suggestion`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ brand, summary, engines, competitors: competitors?.slice(0, 3) }),
@@ -107,19 +118,6 @@ function SuggestedFocus() {
 
   return (
     <Section title="Suggested focus" hint="Gemini reading the real numbers above — a suggestion to verify, not a finding">
-      <div className="flex gap-2 mb-4">
-        {REAL_BRANDS.map((b) => (
-          <button
-            key={b}
-            onClick={() => setBrand(b)}
-            className={`px-3 py-1.5 rounded-lg text-[13px] font-medium border ${
-              brand === b ? "bg-[var(--accent)] text-white border-[var(--accent)]" : "border-[var(--line)] text-[var(--muted)] hover:text-[var(--ink)]"
-            }`}
-          >
-            {b}
-          </button>
-        ))}
-      </div>
       <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-6">
         {error && <p className="text-[14px] text-[var(--neg)]">{error}</p>}
         {!error && !summary && <p className="text-[14px] text-[var(--muted)]">Loading {brand}&apos;s real numbers&#8230;</p>}
@@ -144,13 +142,12 @@ function SuggestedFocus() {
   );
 }
 
-function RealSignal() {
-  const [brand, setBrand] = useState("Wegovy");
+function RealSignal({ brand }: { brand: string }) {
   const [summary, setSummary] = useState<GapSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`${API}/api/profound-runs/summary`)
+    apiFetch(`/api/profound-runs/summary`)
       .then(async (r) => {
         const d = await r.json();
         if (!r.ok) throw new Error(d.error || `${r.status}`);
@@ -165,20 +162,7 @@ function RealSignal() {
 
   return (
     <Section title="Real signal" hint="Profound, live — separate from the mock KPIs on this page">
-      <div className="flex items-center justify-between mb-3 flex-wrap gap-3">
-        <div className="flex gap-2">
-          {REAL_BRANDS.map((b) => (
-            <button
-              key={b}
-              onClick={() => setBrand(b)}
-              className={`px-3 py-1.5 rounded-lg text-[13px] font-medium border ${
-                brand === b ? "bg-[var(--accent)] text-white border-[var(--accent)]" : "border-[var(--line)] text-[var(--muted)] hover:text-[var(--ink)]"
-              }`}
-            >
-              {b}
-            </button>
-          ))}
-        </div>
+      <div className="flex items-center justify-end mb-3">
         <a href="/queries" className="text-[13px] text-[var(--accent)] hover:underline">See the real queries &rarr;</a>
       </div>
 
@@ -233,40 +217,33 @@ function DidItMove() {
   );
 }
 
-function EngineHeatmap() {
-  const [brand, setBrand] = useState("Wegovy");
+function EngineHeatmap({ brand }: { brand: string }) {
   const [data, setData] = useState<EngineBreakdown | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     setData(null);
-    fetch(`${API}/api/profound-runs/by-engine?brand=${brand}`)
+    apiFetch(`/api/profound-runs/by-engine?brand=${brand}`)
       .then(async (r) => {
         const d = await r.json();
         if (!r.ok) throw new Error(d.error || `${r.status}`);
+        if (cancelled) return;
         setData(d);
         setError(null);
       })
-      .catch((e) => setError(e instanceof Error ? e.message : "Can't reach the backend"));
+      .catch((e) => {
+        if (!cancelled) setError(e instanceof Error ? e.message : "Can't reach the backend");
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [brand]);
 
   const engines = data ? Object.keys(data) : [];
 
   return (
     <Section title="Visibility rate by engine" hint="real, per engine — replaces a hardcoded 4-engine table that was never wired to anything">
-      <div className="flex gap-2 mb-4">
-        {REAL_BRANDS.map((b) => (
-          <button
-            key={b}
-            onClick={() => setBrand(b)}
-            className={`px-3 py-1.5 rounded-lg text-[13px] font-medium border ${
-              brand === b ? "bg-[var(--accent)] text-white border-[var(--accent)]" : "border-[var(--line)] text-[var(--muted)] hover:text-[var(--ink)]"
-            }`}
-          >
-            {b}
-          </button>
-        ))}
-      </div>
       {error && <div className="bg-[var(--neg-soft)] border border-[var(--neg)] text-[var(--neg)] rounded-xl p-4 text-sm">{error}</div>}
       {!error && !data && <div className="text-[13px] text-[var(--muted)]">Loading&#8230;</div>}
       {!error && data && engines.length === 0 && (
@@ -303,7 +280,7 @@ function EngineHeatmap() {
   );
 }
 
-function VisibilityExplorer() {
+function VisibilityExplorer({ brand }: { brand: string }) {
   return (
     <>
       <Section title="What people ask — and where you stand" hint="every problem traces to a question">
@@ -315,7 +292,7 @@ function VisibilityExplorer() {
         <a href="/queries" className="inline-block text-[14px] font-medium text-[var(--accent)] hover:underline">Open the real query explorer &rarr;</a>
       </Section>
 
-      <EngineHeatmap />
+      <EngineHeatmap brand={brand} />
 
       <Section title="Where you show up in the answer" hint="rank/position inside the answer">
         <Pending needs="answer-text position parsing" note="Profound gives us who's mentioned, not where in the answer they land — that needs parsing the actual answer text, not built yet." />
@@ -359,40 +336,33 @@ function AnswerQuality() {
 // over the same `mentions` array Profound already gives every run. Rows can
 // mention more than one competitor, so the Lost/Contested columns don't sum
 // to the brand's overall totals — that's expected, not a bug.
-function CompetitiveLandscape() {
-  const [brand, setBrand] = useState("Wegovy");
+function CompetitiveLandscape({ brand }: { brand: string }) {
   const [rows, setRows] = useState<CompetitorRow[] | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     setRows(null);
-    fetch(`${API}/api/profound-runs/competitors?brand=${brand}`)
+    apiFetch(`/api/profound-runs/competitors?brand=${brand}`)
       .then(async (r) => {
         const d = await r.json();
         if (!r.ok) throw new Error(d.error || `${r.status}`);
+        if (cancelled) return;
         setRows(d.rows ?? []);
         setNote(d.note ?? null);
         setError(null);
       })
-      .catch((e) => setError(e instanceof Error ? e.message : "Can't reach the backend"));
+      .catch((e) => {
+        if (!cancelled) setError(e instanceof Error ? e.message : "Can't reach the backend");
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [brand]);
 
   return (
     <Section title="You vs competitors" hint="real mentions in Lost/Contested rows, ranked — exact-name match, so this undercounts, never overcounts">
-      <div className="flex gap-2 mb-4">
-        {REAL_BRANDS.map((b) => (
-          <button
-            key={b}
-            onClick={() => setBrand(b)}
-            className={`px-3 py-1.5 rounded-lg text-[13px] font-medium border ${
-              brand === b ? "bg-[var(--accent)] text-white border-[var(--accent)]" : "border-[var(--line)] text-[var(--muted)] hover:text-[var(--ink)]"
-            }`}
-          >
-            {b}
-          </button>
-        ))}
-      </div>
       {error && <div className="bg-[var(--neg-soft)] border border-[var(--neg)] text-[var(--neg)] rounded-xl p-4 text-sm">{error}</div>}
       {!error && !rows && <div className="text-[13px] text-[var(--muted)]">Loading&#8230;</div>}
       {!error && rows && rows.length === 0 && (
@@ -473,20 +443,28 @@ function DataAndSources() {
 // a scripted chatbot (agentRespond()) with per-role canned answers, both fake.
 // Killed the chat framing since there's no real Q&A pipeline; kept the "Ask I"
 // name for the one thing that IS real: turn a brand's real gap counts into a sentence.
-function Agent() {
+function Agent({ brand }: { brand: string }) {
   const [open, setOpen] = useState(false);
-  const [brand, setBrand] = useState("Wegovy");
   const [summary, setSummary] = useState<GapSummary[string] | null>(null);
   const [narration, setNarration] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!open) return;
+    let cancelled = false;
+    setSummary(null);
     setNarration(null);
-    fetch(`${API}/api/profound-runs/summary`)
+    apiFetch(`/api/profound-runs/summary`)
       .then((r) => r.json())
-      .then((d: GapSummary) => setSummary(d[brand] ?? null))
-      .catch(() => setSummary(null));
+      .then((d: GapSummary) => {
+        if (!cancelled) setSummary(d[brand] ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setSummary(null);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [open, brand]);
 
   async function narrate() {
@@ -494,7 +472,7 @@ function Agent() {
     setLoading(true);
     setNarration(null);
     try {
-      const res = await fetch(`${API}/api/insight-narration`, {
+      const res = await apiFetch(`/api/insight-narration`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ brand, summary }),
@@ -532,15 +510,8 @@ function Agent() {
 
           <div className="px-5 py-3 border-b border-[var(--line)] flex items-center gap-2">
             <span className="text-[13px] uppercase tracking-wider text-[var(--muted)]">Brand</span>
-            <select
-              value={brand}
-              onChange={(e) => setBrand(e.target.value)}
-              className="flex-1 bg-[var(--panel-2)] border border-[var(--line)] rounded-md px-3 py-2 text-[15px] text-[var(--ink)] outline-none"
-            >
-              {REAL_BRANDS.map((b) => (
-                <option key={b} value={b}>{b}</option>
-              ))}
-            </select>
+            <span className="text-[15px] text-[var(--ink)] font-medium">{brand}</span>
+            <span className="text-[12px] text-[var(--muted)]">— set from the brand switcher above</span>
           </div>
 
           <div className="flex-1 overflow-y-auto px-5 py-4">
@@ -571,8 +542,76 @@ function Agent() {
   );
 }
 
+// One brand switcher for the whole page, shared by every section below it.
+// Each section used to keep its own brand pills — clicking "Ozempic" on one
+// card left every other card silently on Wegovy, which reads as broken to
+// anyone who doesn't know the code. Also the one place that tells a viewer
+// two things the raw numbers don't: how stale the data is, and whether this
+// brand is still getting new pulls or is frozen at a one-time snapshot.
+function BrandBar({ brand, onChange }: { brand: string; onChange: (b: string) => void }) {
+  const [activeBrands, setActiveBrands] = useState<string[] | null>(null);
+  const [freshness, setFreshness] = useState<string | null>(null);
+
+  useEffect(() => {
+    apiFetch(`/api/config`)
+      .then((r) => r.json())
+      .then((d) => setActiveBrands(d.activeBrands ?? []))
+      .catch(() => setActiveBrands([]));
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    setFreshness(null);
+    apiFetch(`/api/profound-runs/freshness?brand=${brand}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (!cancelled) setFreshness(d.lastFetchedAt ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setFreshness(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [brand]);
+
+  const isActive = activeBrands === null || activeBrands.includes(brand);
+  const freshnessLabel = freshness
+    ? new Date(freshness).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })
+    : null;
+
+  return (
+    <div className="border-b border-[var(--line)] bg-[var(--panel)]">
+      <div className="max-w-6xl mx-auto w-full px-6 py-3 flex items-center justify-between flex-wrap gap-3">
+        <div className="flex gap-2">
+          {REAL_BRANDS.map((b) => (
+            <button
+              key={b}
+              onClick={() => onChange(b)}
+              className={`px-3 py-1.5 rounded-lg text-[13px] font-medium border ${
+                brand === b ? "bg-[var(--accent)] text-white border-[var(--accent)]" : "border-[var(--line)] text-[var(--muted)] hover:text-[var(--ink)]"
+              }`}
+            >
+              {b}
+            </button>
+          ))}
+        </div>
+        <div className="text-[12px] text-[var(--muted)] flex items-center gap-3 flex-wrap">
+          {freshnessLabel && <span>Data as of {freshnessLabel}</span>}
+          {activeBrands && !isActive && (
+            <span className="text-[var(--warning-foreground)] font-medium">
+              One-time pull, not refreshed — only {activeBrands.join(", ") || "no brand"} is on active pull
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [view, setView] = useState("overview");
+  const [brand, setBrand] = useState("Wegovy");
 
   const navItems = [
     { key: "overview", label: "Overview" },
@@ -614,23 +653,25 @@ export default function Home() {
         </div>
       </nav>
 
+      <BrandBar brand={brand} onChange={setBrand} />
+
       <main className="max-w-6xl mx-auto w-full px-6 py-8">
         {view === "overview" && (
           <>
-            <RealSignal />
-            <SuggestedFocus />
+            <RealSignal brand={brand} />
+            <SuggestedFocus brand={brand} />
             <DidItMove />
           </>
         )}
-        {view === "visibility" && <VisibilityExplorer />}
+        {view === "visibility" && <VisibilityExplorer brand={brand} />}
         {view === "citations" && <CitationIntelligence />}
-        {view === "competitors" && <CompetitiveLandscape />}
+        {view === "competitors" && <CompetitiveLandscape brand={brand} />}
         {view === "quality" && <AnswerQuality />}
         {view === "actions" && <ActionsLift />}
         {view === "sources" && <DataAndSources />}
       </main>
 
-      <Agent />
+      <Agent brand={brand} />
     </div>
   );
 }

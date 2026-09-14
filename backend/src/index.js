@@ -32,6 +32,16 @@ function requireKey(req, res, next) {
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
+// Which brands actually keep getting new data vs. a one-time historical pull
+// that's now frozen. Ozempic and CagriSema were pulled once before scope
+// narrowed to one brand at a time (see fetch-profound.js) — GEOI_ACTIVE_BRANDS
+// is the real source of truth for which ones keep refreshing, so read it
+// instead of hardcoding a duplicate list here that could drift.
+app.get('/api/config', requireKey, (_req, res) => {
+  const activeBrands = (process.env.GEOI_ACTIVE_BRANDS || '').split(',').map((s) => s.trim()).filter(Boolean);
+  res.json({ activeBrands });
+});
+
 app.get('/api/metrics', requireKey, async (_req, res) => {
   const { data, error } = await supabase.from('metrics').select('*').order('computed_at', { ascending: false }).limit(50);
   if (error) return res.status(500).json({ error: error.message });
@@ -88,26 +98,52 @@ const GAP_STATUSES = ['won', 'contested', 'lost', 'absent'];
 
 app.get('/api/profound-runs/summary', requireKey, async (_req, res) => {
   try {
-    const summary = {};
-    for (const brand of KNOWN_BRANDS) {
-      const counts = { won: 0, contested: 0, lost: 0, absent: 0, total: 0 };
-      let brandTotal = 0;
-      for (const status of GAP_STATUSES) {
+    // All brand x status counts fired at once — was a fully sequential double
+    // loop (12 round trips, one waiting on the last for no reason since none
+    // of these queries depend on each other).
+    const jobs = KNOWN_BRANDS.flatMap((brand) =>
+      GAP_STATUSES.map(async (status) => {
         const { count, error } = await supabase
           .from('profound_runs')
           .select('id', { count: 'exact', head: true })
           .eq('brand', brand)
           .eq('gap_status', status);
         if (error) throw error;
-        counts[status] = count ?? 0;
-        brandTotal += count ?? 0;
-      }
-      if (brandTotal > 0) {
-        counts.total = brandTotal;
-        summary[brand] = counts;
-      }
+        return { brand, status, count: count ?? 0 };
+      })
+    );
+    const results = await Promise.all(jobs);
+    const summary = {};
+    for (const { brand, status, count } of results) {
+      const counts = (summary[brand] ??= { won: 0, contested: 0, lost: 0, absent: 0, total: 0 });
+      counts[status] = count;
+      counts.total += count;
+    }
+    for (const brand of Object.keys(summary)) {
+      if (summary[brand].total === 0) delete summary[brand];
     }
     res.json(summary);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// When was this brand's data actually pulled — the dashboard used to show
+// real counts with no way to tell if they were from today or three weeks
+// ago. A single row, ordered + limited to 1, so this doesn't hit the
+// unbounded-select cap that broke /summary.
+app.get('/api/profound-runs/freshness', requireKey, async (req, res) => {
+  const { brand } = req.query;
+  if (!brand) return res.status(400).json({ error: 'brand is required' });
+  try {
+    const { data, error } = await supabase
+      .from('profound_runs')
+      .select('fetched_at')
+      .eq('brand', brand)
+      .order('fetched_at', { ascending: false })
+      .limit(1);
+    if (error) throw error;
+    res.json({ lastFetchedAt: data?.[0]?.fetched_at ?? null });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -131,10 +167,10 @@ app.get('/api/profound-runs/by-engine', requireKey, async (req, res) => {
   const { brand } = req.query;
   if (!brand) return res.status(400).json({ error: 'brand is required' });
   try {
-    const byEngine = {};
-    for (const engine of KNOWN_ENGINES) {
-      const counts = { won: 0, contested: 0, lost: 0, absent: 0, total: 0 };
-      for (const status of GAP_STATUSES) {
+    // 8 engines x 4 statuses fired at once — was 32 fully sequential round
+    // trips, the slowest part of loading this brand's Visibility tab.
+    const jobs = KNOWN_ENGINES.flatMap((engine) =>
+      GAP_STATUSES.map(async (status) => {
         const { count, error } = await supabase
           .from('profound_runs')
           .select('id', { count: 'exact', head: true })
@@ -142,10 +178,18 @@ app.get('/api/profound-runs/by-engine', requireKey, async (req, res) => {
           .eq('engine_name', engine)
           .eq('gap_status', status);
         if (error) throw error;
-        counts[status] = count ?? 0;
-        counts.total += count ?? 0;
-      }
-      if (counts.total > 0) byEngine[engine] = counts;
+        return { engine, status, count: count ?? 0 };
+      })
+    );
+    const results = await Promise.all(jobs);
+    const byEngine = {};
+    for (const { engine, status, count } of results) {
+      const counts = (byEngine[engine] ??= { won: 0, contested: 0, lost: 0, absent: 0, total: 0 });
+      counts[status] = count;
+      counts.total += count;
+    }
+    for (const engine of Object.keys(byEngine)) {
+      if (byEngine[engine].total === 0) delete byEngine[engine];
     }
     res.json(byEngine);
   } catch (e) {
@@ -171,25 +215,30 @@ app.get('/api/profound-runs/competitors', requireKey, async (req, res) => {
   const { brand } = req.query;
   if (!brand) return res.status(400).json({ error: 'brand is required' });
   try {
-    const rows = [];
-    for (const name of KNOWN_COMPETITORS) {
-      // supabase-js's .contains() mis-encodes a jsonb array containment filter
-      // (sends a Postgres array literal, PostgREST wants JSON) and fails with
-      // "invalid input syntax for type json" — .filter(col, 'cs', json) sends
-      // the same "cs." operator with the JSON encoding PostgREST actually needs.
-      const [lostRes, contestedRes] = await Promise.all([
-        supabase.from('profound_runs').select('id', { count: 'exact', head: true })
-          .eq('brand', brand).eq('gap_status', 'lost').filter('mentions', 'cs', JSON.stringify([name])),
-        supabase.from('profound_runs').select('id', { count: 'exact', head: true })
-          .eq('brand', brand).eq('gap_status', 'contested').filter('mentions', 'cs', JSON.stringify([name])),
-      ]);
-      if (lostRes.error) throw lostRes.error;
-      if (contestedRes.error) throw contestedRes.error;
-      const lost = lostRes.count ?? 0;
-      const contested = contestedRes.count ?? 0;
-      if (lost + contested > 0) rows.push({ competitor: name, lost, contested, total: lost + contested });
-    }
-    rows.sort((a, b) => b.total - a.total);
+    // All 9 competitors x 2 counts fired at once instead of one competitor at
+    // a time — the sequential version took 9-10s per brand in testing (each
+    // competitor waited on the previous one's round trip for no reason, since
+    // none of these 18 queries depend on each other).
+    const results = await Promise.all(
+      KNOWN_COMPETITORS.map(async (name) => {
+        // supabase-js's .contains() mis-encodes a jsonb array containment filter
+        // (sends a Postgres array literal, PostgREST wants JSON) and fails with
+        // "invalid input syntax for type json" — .filter(col, 'cs', json) sends
+        // the same "cs." operator with the JSON encoding PostgREST actually needs.
+        const [lostRes, contestedRes] = await Promise.all([
+          supabase.from('profound_runs').select('id', { count: 'exact', head: true })
+            .eq('brand', brand).eq('gap_status', 'lost').filter('mentions', 'cs', JSON.stringify([name])),
+          supabase.from('profound_runs').select('id', { count: 'exact', head: true })
+            .eq('brand', brand).eq('gap_status', 'contested').filter('mentions', 'cs', JSON.stringify([name])),
+        ]);
+        if (lostRes.error) throw lostRes.error;
+        if (contestedRes.error) throw contestedRes.error;
+        const lost = lostRes.count ?? 0;
+        const contested = contestedRes.count ?? 0;
+        return { competitor: name, lost, contested, total: lost + contested };
+      })
+    );
+    const rows = results.filter((r) => r.total > 0).sort((a, b) => b.total - a.total);
     res.json({ rows, note: 'Exact-name match — undercounts rows where the mention includes extra text (e.g. "Mounjaro (tirzepatide)"). Never overcounts.' });
   } catch (e) {
     res.status(500).json({ error: e.message });

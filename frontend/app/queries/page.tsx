@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 import ThemeToggle from "@/lib/ThemeToggle";
+import { apiFetch } from "@/lib/api";
 
-const API = process.env.NEXT_PUBLIC_GEOI_API_URL || "http://localhost:4000";
 const BRANDS = ["Wegovy", "Ozempic", "CagriSema"];
 
 type Run = {
@@ -62,18 +62,20 @@ export default function QueriesPage() {
   const [narrationLoading, setNarrationLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadRows = useCallback(async () => {
+  const loadRows = useCallback(async (cancelledRef: { current: boolean }) => {
     const params = new URLSearchParams({ brand, limit: "50" });
     if (gapStatus) params.set("gap_status", gapStatus);
     if (q) params.set("q", q);
     try {
-      const res = await fetch(`${API}/api/profound-runs?${params}`);
+      const res = await apiFetch(`/api/profound-runs?${params}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || `${res.status}`);
+      if (cancelledRef.current) return;
       setRows(data.rows ?? []);
       setTotal(data.total ?? 0);
       setError(null);
     } catch (e) {
+      if (cancelledRef.current) return;
       const msg = e instanceof Error ? e.message : "unknown error";
       setError(
         msg.includes("Failed to fetch")
@@ -88,7 +90,7 @@ export default function QueriesPage() {
 
   const loadSummary = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/api/profound-runs/summary`);
+      const res = await apiFetch(`/api/profound-runs/summary`);
       if (!res.ok) return;
       setSummary(await res.json());
     } catch {
@@ -97,7 +99,14 @@ export default function QueriesPage() {
   }, []);
 
   useEffect(() => {
-    loadRows();
+    // A fast brand/filter switch can let a slower, earlier request resolve
+    // after a later one and overwrite it with stale rows — same race caught
+    // on the main dashboard's brand switcher, fixed the same way here.
+    const cancelledRef = { current: false };
+    loadRows(cancelledRef);
+    return () => {
+      cancelledRef.current = true;
+    };
   }, [loadRows]);
 
   useEffect(() => {
@@ -109,7 +118,7 @@ export default function QueriesPage() {
     setNarrationLoading(true);
     setNarration(null);
     try {
-      const res = await fetch(`${API}/api/insight-narration`, {
+      const res = await apiFetch(`/api/insight-narration`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ brand, summary: summary[brand] }),
