@@ -1,32 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  SOURCES,
-  health,
-  largestOpportunity,
-  opportunityContext,
-  signalRelationship,
-  liftBoundary,
-  businessBoundary,
-  actions,
-  lift,
-  clusters,
-  heatmap,
-  rankDistribution,
-  citedSources,
-  claimValidation,
-  riskQueue,
-  competitiveRanking,
-  contextualCompetitors,
-  noImpact,
-  agents,
-  dataSources,
-  ROLES,
-  roleBriefs,
-  agentRespond,
-  type Role,
-} from "@/lib/mockData";
+import ThemeToggle from "@/lib/ThemeToggle";
+import { SOURCES } from "@/lib/mockData";
 
 const API = process.env.NEXT_PUBLIC_GEOI_API_URL || "http://localhost:4000";
 const REAL_BRANDS = ["Wegovy", "Ozempic", "CagriSema"];
@@ -44,14 +20,14 @@ function SourceTag({ k }: { k: string }) {
   );
 }
 
-function SignalMeter({ score }: { score: number }) {
-  const segs = 10;
-  const on = Math.round(score / 10);
+// A killed feature: no fabricated numbers, just the real reason it's not
+// here yet and what would make it real. Per the audit in this session —
+// every feature on this dashboard needs a "why does this exist" that
+// survives contact with real data, or it gets pulled, not left as a mock.
+function Pending({ needs, note }: { needs: string; note?: string }) {
   return (
-    <div className="signal" aria-label={`${score} out of 100`}>
-      {Array.from({ length: segs }).map((_, i) => (
-        <div key={i} className={`seg ${i < on ? "on" : ""} ${i < on && score < 70 ? "warn" : ""}`} />
-      ))}
+    <div className="bg-[var(--panel)] border border-dashed border-[var(--line)] rounded-xl p-6 text-[14px] text-[var(--muted)] leading-relaxed">
+      <span className="font-medium text-[var(--ink)]">Not built.</span> Needs {needs} — no real data behind this yet, so it's not shown as if there were. {note}
     </div>
   );
 }
@@ -80,68 +56,20 @@ function Section({ title, children }: { title: string; hint?: string; children: 
 function WhatToDo() {
   return (
     <Section title="What to do" hint="the decision, then the evidence">
-      <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
-        {actions.map((a, idx) => (
-          <div
-            key={a.action}
-            className={`flex items-center justify-between gap-4 py-4 border-b border-[var(--line)] first:pt-0 last:pb-0 last:border-0 ${idx === 0 ? "border-l-2 border-l-[var(--accent)] pl-4 -ml-5" : ""}`}
-          >
-            <div>
-              <div className="text-[16px] font-medium">{a.action}</div>
-              <div className="text-[14px] text-[var(--muted)] mt-1">{a.evidence}</div>
-              <div className="text-[14px] text-[var(--accent)] mt-1.5">Why first: {a.why}</div>
-            </div>
-            <div className="text-right shrink-0">
-              <span
-                className={`text-[13px] font-medium px-2.5 py-1 rounded ${
-                  a.approval === "Approved" ? "bg-[var(--pos-soft)] text-[var(--pos)]" : "bg-[var(--neg-soft)] text-[var(--neg)]"
-                }`}
-              >
-                {a.approval}
-              </span>
-              <div className="num text-[14px] text-[var(--muted)] mt-1.5">{a.lift}</div>
-            </div>
-          </div>
-        ))}
-      </div>
+      <Pending needs="GEO Craft" note="This showed two fabricated actions ('publish a comparison page', 'fix positioning') that were never actually taken — killed rather than imply work happened. Once Craft exists, real content-gap briefs land here." />
     </Section>
   );
 }
 
 function WhyItMatters() {
   return (
-    <Section title="Why it matters" hint="the number, then the meaning">
-      <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-6">
-        <div className="flex items-center gap-4">
-          <span className="num text-4xl font-semibold tracking-tight">{health.score}</span>
-          <SignalMeter score={health.score} />
-          <span className="text-base text-[var(--neg)] font-medium">{health.label}</span>
-        </div>
-
-        <div className="text-[17px] font-semibold mt-5">{largestOpportunity.title}</div>
-        <div className="flex flex-wrap gap-x-5 gap-y-1.5 mt-2">
-          {largestOpportunity.inputs.map((i) => (
-            <span key={i.label} className="text-[14px] text-[var(--muted)]">
-              <span className="num text-[var(--ink)] font-medium">{i.value}</span> {i.label.toLowerCase()}
-            </span>
-          ))}
-        </div>
-
-        <div className="mt-4 text-[15px] text-[var(--accent)] bg-[var(--accent-soft)] border border-[var(--line)] rounded-lg px-5 py-3.5 leading-relaxed">
-          {signalRelationship}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-          {opportunityContext.map((c) => (
-            <div key={c.layer} className="bg-[var(--panel-2)] border border-[var(--line)] rounded-lg p-5">
-              <div className="flex items-center justify-between">
-                <span className="text-[13px] uppercase tracking-wider text-[var(--accent)] font-semibold">{c.layer}</span>
-                <SourceTag k={c.source} />
-              </div>
-              <div className="text-[15px] leading-relaxed mt-2.5">{c.text}</div>
-            </div>
-          ))}
-        </div>
+    <Section title="Why it matters" hint="a made-up health score and a hardcoded opportunity — replaced by the real thing above">
+      <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-6 text-[14px] text-[var(--muted)] leading-relaxed">
+        <span className="font-medium text-[var(--ink)]">Killed, not rebuilt.</span> This used to show a health score with
+        arbitrary weights (40/30/30, never validated) and a hardcoded "opportunity" about diabetes-treatment questions in
+        India — leftover from the old Ozempic demo, unrelated to the real Wegovy data above. The real version of "why it
+        matters" is the Real signal panel and Ask I's narration, both live. Didn't fabricate a replacement just to fill
+        this space.
       </div>
     </Section>
   );
@@ -230,24 +158,80 @@ function RealSignal() {
 
 function DidItMove() {
   return (
-    <Section title="The result so far" hint="GEO movement, with the honest boundary">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {lift.map((l) => (
-          <div key={l.label} className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
-            <div className="text-[13px] text-[var(--muted)]">{l.label}</div>
-            <div className="num text-3xl font-semibold text-[var(--pos)] mt-1.5">{l.value}</div>
-            <div className="mt-2.5"><SourceTag k={l.source} /></div>
-          </div>
+    <Section title="The result so far" hint="whether Wegovy's real numbers actually moved — not attribution">
+      <Pending needs="your CRM (AI-referral tracking)" note="This showed a fake +18% visibility lift and $340k attributed revenue — numbers nobody produced, from a Phase 3 dependency that doesn't exist yet. Once real GEO work goes live through Craft, movement shows as a before/after on the real signal panel above; revenue attribution needs the CRM link in the roadmap." />
+    </Section>
+  );
+}
+
+type EngineBreakdown = Record<string, { won: number; contested: number; lost: number; absent: number; total: number }>;
+
+function EngineHeatmap() {
+  const [brand, setBrand] = useState("Wegovy");
+  const [data, setData] = useState<EngineBreakdown | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setData(null);
+    fetch(`${API}/api/profound-runs/by-engine?brand=${brand}`)
+      .then(async (r) => {
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || `${r.status}`);
+        setData(d);
+        setError(null);
+      })
+      .catch((e) => setError(e instanceof Error ? e.message : "Can't reach the backend"));
+  }, [brand]);
+
+  const engines = data ? Object.keys(data) : [];
+
+  return (
+    <Section title="Visibility rate by engine" hint="real, per engine — replaces a hardcoded 4-engine table that was never wired to anything">
+      <div className="flex gap-2 mb-4">
+        {REAL_BRANDS.map((b) => (
+          <button
+            key={b}
+            onClick={() => setBrand(b)}
+            className={`px-3 py-1.5 rounded-lg text-[13px] font-medium border ${
+              brand === b ? "bg-[var(--accent)] text-white border-[var(--accent)]" : "border-[var(--line)] text-[var(--muted)] hover:text-[var(--ink)]"
+            }`}
+          >
+            {b}
+          </button>
         ))}
-        <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
-          <div className="text-[13px] text-[var(--muted)]">{businessBoundary.label}</div>
-          <div className="num text-3xl font-semibold mt-1.5">{businessBoundary.value}</div>
-          <div className="mt-2.5"><SourceTag k={businessBoundary.source} /></div>
+      </div>
+      {error && <div className="bg-[var(--neg-soft)] border border-[var(--neg)] text-[var(--neg)] rounded-xl p-4 text-sm">{error}</div>}
+      {!error && !data && <div className="text-[13px] text-[var(--muted)]">Loading&#8230;</div>}
+      {!error && data && engines.length === 0 && (
+        <div className="text-[13px] text-[var(--muted)]">No real data pulled yet for {brand}.</div>
+      )}
+      {!error && data && engines.length > 0 && (
+        <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead><tr><Th>Engine</Th><Th>Visibility rate</Th><Th>Won</Th><Th>Contested</Th><Th>Lost</Th><Th>Real runs</Th></tr></thead>
+              <tbody>
+                {engines.map((e) => {
+                  const d = data[e];
+                  const vis = d.total ? Math.round(((d.won + d.contested) / d.total) * 1000) / 10 : 0;
+                  return (
+                    <tr key={e} className="hover:bg-[var(--panel-2)]">
+                      <Td className="font-medium">{e}</Td>
+                      <Td>
+                        <span className={`num inline-block min-w-[56px] text-center px-2.5 py-1.5 rounded text-sm font-medium ${vis < 10 ? "bg-[var(--neutral-100)] text-[var(--neutral-600)]" : vis < 25 ? "bg-[var(--primary-light-background)] text-[var(--primary)]" : vis < 35 ? "bg-[var(--primary)] text-white" : "bg-[var(--primary-background-hover)] text-white"}`}>{vis}%</span>
+                      </Td>
+                      <Td className="num text-[var(--pos)]">{d.won}</Td>
+                      <Td className="num">{d.contested}</Td>
+                      <Td className="num text-[var(--neg)]">{d.lost}</Td>
+                      <Td className="num text-[var(--muted)]">{d.total}</Td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
-      <div className="mt-4 text-[14px] text-[var(--muted)] leading-relaxed bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
-        {liftBoundary}
-      </div>
+      )}
     </Section>
   );
 }
@@ -256,57 +240,18 @@ function VisibilityExplorer() {
   return (
     <>
       <Section title="What people ask — and where you stand" hint="every problem traces to a question">
-        <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr><Th>Topic</Th><Th>Why they ask</Th><Th>Appears</Th><Th>Recommended</Th><Th>Where you show up</Th><Th>Who leads</Th><Th>Falling behind</Th><Th>Priority</Th></tr>
-              </thead>
-              <tbody>
-                {clusters.map((c) => (
-                  <tr key={c.name} className="hover:bg-[var(--panel-2)]">
-                    <Td>{c.name}</Td><Td className="text-[var(--muted)]">{c.intent}</Td>
-                    <Td className="num">{c.visibility}%</Td><Td className="num">{c.recommendation}%</Td>
-                    <Td>{c.position}</Td><Td className="text-[var(--muted)]">{c.leader}</Td>
-                    <Td className={`num font-medium ${c.gap < 0 ? "text-[var(--neg)]" : "text-[var(--pos)]"}`}>{c.gap > 0 ? `+${c.gap}` : c.gap}</Td>
-                    <Td><span className={`text-[13px] font-medium px-2.5 py-1 rounded ${c.priority === "High" ? "bg-[var(--neg-soft)] text-[var(--neg)]" : c.priority === "Med" ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "bg-[var(--line)] text-[var(--muted)]"}`}>{c.priority}</span></Td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <p className="text-[14px] text-[var(--muted)] mb-3">
+          This used to be a fabricated topic table (fake "who leads," fake "position"). Neither is something Profound's
+          data actually gives us per topic yet. The real, working version of this question is the query explorer —
+          every real prompt, filterable, with the real answer and real gap status.
+        </p>
+        <a href="/queries" className="inline-block text-[14px] font-medium text-[var(--accent)] hover:underline">Open the real query explorer &rarr;</a>
       </Section>
 
-      <Section title="Which AI assistant recommends you" hint="being recommended is the signal that matters">
-        <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead><tr><Th>Topic</Th>{heatmap.engines.map((e) => <Th key={e}>{e}</Th>)}</tr></thead>
-              <tbody>
-                {heatmap.rows.map((r) => (
-                  <tr key={r.cluster}>
-                    <Td>{r.cluster}</Td>
-                    {r.rec.map((v, i) => (
-                      <Td key={i}><span className={`num inline-block min-w-[48px] text-center px-2.5 py-1.5 rounded text-sm font-medium ${v < 10 ? "bg-[var(--neutral-100)] text-[var(--neutral-600)]" : v < 25 ? "bg-[var(--primary-light-background)] text-[var(--primary)]" : v < 35 ? "bg-[var(--primary)] text-white" : "bg-[var(--primary-background-hover)] text-white"}`}>{v}%</span></Td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </Section>
+      <EngineHeatmap />
 
-      <Section title="Where you show up in the answer" hint="where you land matters">
-        <div className="grid grid-cols-5 gap-4">
-          {rankDistribution.map((r) => (
-            <div key={r.label} className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5 text-center">
-              <div className="num text-2xl font-semibold">{r.value}%</div>
-              <div className="text-[13px] text-[var(--muted)] mt-1.5">{r.label}</div>
-            </div>
-          ))}
-        </div>
+      <Section title="Where you show up in the answer" hint="rank/position inside the answer">
+        <Pending needs="answer-text position parsing" note="Profound gives us who's mentioned, not where in the answer they land — that needs parsing the actual answer text, not built yet." />
       </Section>
     </>
   );
@@ -315,38 +260,15 @@ function VisibilityExplorer() {
 function CitationIntelligence() {
   return (
     <>
-      <Section title="What the AI cites" hint="and whether they back the claim">
-        <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead><tr><Th>Source</Th><Th>Type</Th><Th>Citations</Th><Th>Backs the claim</Th><Th>How fresh</Th><Th>Cited how often</Th></tr></thead>
-              <tbody>
-                {citedSources.map((s) => (
-                  <tr key={s.domain} className="hover:bg-[var(--panel-2)]">
-                    <Td className="font-medium">{s.domain}</Td><Td className="text-[var(--muted)]">{s.type}</Td>
-                    <Td className="num">{s.citations}</Td>
-                    <Td><span className={`text-[13px] font-medium px-2.5 py-1 rounded ${s.support === "Yes" ? "bg-[var(--pos-soft)] text-[var(--pos)]" : s.support === "Partly" ? "bg-[var(--neg-soft)] text-[var(--neg)]" : "bg-[var(--line)] text-[var(--muted)]"}`}>{s.support}</span></Td>
-                    <Td className="text-[var(--muted)]">{s.freshness}</Td><Td className="num">{s.persistence}%</Td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+      <Section title="What the AI cites" hint="real citation URLs come through Profound — domain-level aggregation isn't built">
+        <Pending
+          needs="domain aggregation over real citation data"
+          note="Every real run already carries real citation URLs (see a row's raw data in /queries). Rolling them up into a domain-frequency table is real, buildable work — just not done yet. Rebuilt, not left as the old fake domain list."
+        />
       </Section>
 
       <Section title="Does the source back the claim" hint="being cited is not the same as being right">
-        <div className="space-y-3">
-          {claimValidation.map((c) => (
-            <div key={c.claim} className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5 flex items-start justify-between gap-4">
-              <div>
-                <div className="text-[15px]">{c.claim}</div>
-                <div className="text-[14px] text-[var(--muted)] mt-2">source cited: <span className="num">{c.source}</span></div>
-              </div>
-              <span className={`shrink-0 text-[13px] font-medium px-2.5 py-1 rounded ${c.support === "Backed" ? "bg-[var(--pos-soft)] text-[var(--pos)]" : "bg-[var(--neg-soft)] text-[var(--neg)]"}`}>{c.support}</span>
-            </div>
-          ))}
-        </div>
+        <Pending needs="your approved facts (a knowledge base)" note="Explicitly out of scope for this phase per the product spec — MVP-scoped but not started." />
       </Section>
     </>
   );
@@ -355,40 +277,12 @@ function CitationIntelligence() {
 function AnswerQuality() {
   return (
     <>
-      <Section title="Answer accuracy" hint="three checks, not one number">
-        <div className="grid grid-cols-3 gap-4">
-          {[
-            { label: "Facts right", value: "94.2%" },
-            { label: "Positioning right", value: "81.5%" },
-            { label: "Brand right", value: "91.0%" },
-          ].map((a) => (
-            <div key={a.label} className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
-              <div className="text-[13px] text-[var(--muted)]">{a.label}</div>
-              <div className="num text-3xl font-semibold mt-1.5">{a.value}</div>
-              <div className="mt-2.5"><SourceTag k="kb" /></div>
-            </div>
-          ))}
-        </div>
+      <Section title="Answer accuracy" hint="facts right / positioning right / brand right">
+        <Pending needs="your approved facts (a knowledge base)" note="There's nothing to check accuracy against yet — killed the fake 94.2%/81.5%/91.0% rather than keep numbers with no reference to be accurate against." />
       </Section>
 
-      <Section title="Things to fix" hint="each with a next step">
-        <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead><tr><Th>Issue</Th><Th>How serious</Th><Th>What it is</Th><Th>Owner</Th><Th>Status</Th><Th /></tr></thead>
-              <tbody>
-                {riskQueue.map((r) => (
-                  <tr key={r.issue} className="hover:bg-[var(--panel-2)]">
-                    <Td>{r.risk}</Td>
-                    <Td><span className={`text-[13px] font-medium px-2.5 py-1 rounded ${r.severity === "Critical" || r.severity === "High" ? "bg-[var(--neg-soft)] text-[var(--neg)]" : "bg-[var(--line)] text-[var(--muted)]"}`}>{r.severity}</span></Td>
-                    <Td>{r.issue}</Td><Td className="text-[var(--muted)]">{r.owner}</Td><Td className="text-[var(--muted)]">{r.status}</Td>
-                    <Td><button className="text-sm font-medium text-[var(--accent)] hover:underline whitespace-nowrap">Review →</button></Td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+      <Section title="Things to fix" hint="a medical/legal review queue">
+        <Pending needs="a review workflow tied to real flagged answers" note="Also depends on the knowledge base above to know what counts as wrong." />
       </Section>
     </>
   );
@@ -396,37 +290,12 @@ function AnswerQuality() {
 
 function CompetitiveLandscape() {
   return (
-    <>
-      <Section title="You vs competitors" hint="same questions, same assistants">
-        <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead><tr><Th>Brand</Th><Th>Appears</Th><Th>Cited</Th><Th>Recommended</Th></tr></thead>
-              <tbody>
-                {competitiveRanking.map((c) => (
-                  <tr key={c.name} className={c.name === "Ozempic" ? "bg-[var(--accent-soft)]" : "hover:bg-[var(--panel-2)]"}>
-                    <Td className="font-medium">{c.name}</Td><Td className="num">{c.visibility}%</Td><Td className="num">{c.citation}%</Td><Td className="num">{c.recommendation}%</Td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </Section>
-
-      <Section title="Who you compete with, by situation" hint="your real rival changes by situation">
-        <div className="space-y-3">
-          {contextualCompetitors.map((c) => (
-            <div key={c.context} className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
-              <div className="text-[15px] font-medium">{c.context}</div>
-              <div className="text-sm text-[var(--muted)] mt-1.5">
-                competitor to watch: <span className="font-medium text-[var(--ink)]">{c.competitor}</span> · {c.why}
-              </div>
-            </div>
-          ))}
-        </div>
-      </Section>
-    </>
+    <Section title="You vs competitors" hint="real competitor names are already in every mention — ranking them isn't built">
+      <Pending
+        needs="per-competitor aggregation over real mention data"
+        note={'Real example, from the actual data: filter /queries to "Lost" and the Mentions column is dominated by one name — that IS the competitive signal. A ranked rollup of it is real, buildable work, not done yet.'}
+      />
+    </Section>
   );
 }
 
@@ -434,69 +303,37 @@ function ActionsLift() {
   return (
     <>
       <Section title="What you did" hint="every action ties to evidence">
-        <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead><tr><Th>Action</Th><Th>Problem</Th><Th>Evidence</Th><Th>Owner</Th><Th>Agent</Th><Th>Status</Th><Th>Expected change</Th></tr></thead>
-              <tbody>
-                {actions.map((a) => (
-                  <tr key={a.action} className="hover:bg-[var(--panel-2)]">
-                    <Td className="font-medium">{a.action}</Td><Td className="text-[var(--muted)]">{a.gap}</Td><Td className="text-[var(--muted)]">{a.evidence}</Td>
-                    <Td>{a.owner}</Td><Td className="text-[var(--muted)]">{a.agent}</Td>
-                    <Td><span className={`text-[13px] font-medium px-2.5 py-1 rounded ${a.approval === "Approved" ? "bg-[var(--pos-soft)] text-[var(--pos)]" : "bg-[var(--neg-soft)] text-[var(--neg)]"}`}>{a.approval}</span></Td>
-                    <Td className="num">{a.lift}</Td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <Pending needs="GEO Craft" note="No content has actually been created or published yet — this needs the content-creation product, which doesn't exist. Killed the two fake actions rather than show work that didn't happen." />
       </Section>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Section title="What didn't move" hint="learn from what didn't move">
-          <div className="space-y-3">
-            {noImpact.map((n) => (
-              <div key={n.intervention} className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5 flex items-center justify-between gap-4">
-                <div>
-                  <div className="text-[15px] font-medium">{n.intervention}</div>
-                  <div className="text-[14px] text-[var(--muted)] mt-1">{n.target}</div>
-                </div>
-                <div className="text-right shrink-0">
-                  <span className="text-[13px] bg-[var(--line)] text-[var(--muted)] px-2.5 py-1 rounded">{n.result}</span>
-                  <div className="text-[14px] text-[var(--muted)] mt-1.5">{n.decision}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Section>
-
-        <Section title="Who does the work" hint="one agent per job">
-          <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
-            <div className="flex flex-wrap gap-2.5">
-              {agents.map((a) => (
-                <span key={a} className="text-sm text-[var(--muted)] border border-[var(--line)] px-3 py-1.5 rounded-full">{a}</span>
-              ))}
-            </div>
-          </div>
-        </Section>
-      </div>
+      <Section title="Who does the work" hint="agent routing">
+        <Pending needs="GEO GPS and GEO Craft to exist" note="The 5 fake agent names (“Content Authority Agent” etc.) named products/roles that were never built. Removed rather than imply a routing system exists." />
+      </Section>
     </>
   );
 }
 
+const REAL_DATA_SOURCES = [
+  { capability: "Real queries + gap diagnosis", source: "Profound", type: "profound", status: "Live", statusTone: "pos" as const },
+  { capability: "Insight narration (Ask I)", source: "Gemini API", type: "gemini", status: "Live, internal only", statusTone: "pos" as const },
+  { capability: "Citation domain authority", source: "Ahrefs", type: "ahrefs", status: "No free tier — $129-$10k/mo, your call", statusTone: "neg" as const },
+  { capability: "First-party crawl/index health", source: "Bing Webmaster Tools", type: "bing", status: "Free, blocked on domain access", statusTone: "neg" as const },
+  { capability: "Fact accuracy reference", source: "Your approved facts", type: "kb", status: "Not built", statusTone: "muted" as const },
+  { capability: "AI-referral conversion", source: "Your CRM", type: "crm", status: "Not built — Phase 3", statusTone: "muted" as const },
+];
+
 function DataAndSources() {
   return (
-    <Section title="Where the data comes from" hint="the source behind every number">
+    <Section title="Where the data comes from" hint="the real state, not the original demo's">
       <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead><tr><Th>What it measures</Th><Th>Data needed</Th><Th>Source</Th><Th>Type</Th></tr></thead>
+            <thead><tr><Th>Capability</Th><Th>Source</Th><Th>Status</Th></tr></thead>
             <tbody>
-              {dataSources.map((d) => (
+              {REAL_DATA_SOURCES.map((d) => (
                 <tr key={d.capability} className="hover:bg-[var(--panel-2)]">
-                  <Td className="font-medium">{d.capability}</Td><Td className="text-[var(--muted)]">{d.data}</Td><Td className="num">{d.source}</Td>
-                  <Td><SourceTag k={Object.keys(SOURCES).find((k) => SOURCES[k].name === d.source) ?? ""} /></Td>
+                  <Td className="font-medium">{d.capability}</Td>
+                  <Td><SourceTag k={d.type} /></Td>
+                  <Td className={d.statusTone === "pos" ? "text-[var(--pos)]" : d.statusTone === "neg" ? "text-[var(--neg)]" : "text-[var(--muted)]"}>{d.status}</Td>
                 </tr>
               ))}
             </tbody>
@@ -507,18 +344,43 @@ function DataAndSources() {
   );
 }
 
+// Real Gemini narration, same endpoint the /queries page uses — this used to be
+// a scripted chatbot (agentRespond()) with per-role canned answers, both fake.
+// Killed the chat framing since there's no real Q&A pipeline; kept the "Ask I"
+// name for the one thing that IS real: turn a brand's real gap counts into a sentence.
 function Agent() {
   const [open, setOpen] = useState(false);
-  const [role, setRole] = useState<Role>("exec");
-  const [messages, setMessages] = useState<{ from: "user" | "agent"; text: string }[]>([]);
-  const [input, setInput] = useState("");
-  const brief = roleBriefs[role];
+  const [brand, setBrand] = useState("Wegovy");
+  const [summary, setSummary] = useState<GapSummary[string] | null>(null);
+  const [narration, setNarration] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  function send() {
-    const q = input.trim();
-    if (!q) return;
-    setMessages((m) => [...m, { from: "user", text: q }, { from: "agent", text: agentRespond(q, role) }]);
-    setInput("");
+  useEffect(() => {
+    if (!open) return;
+    setNarration(null);
+    fetch(`${API}/api/profound-runs/summary`)
+      .then((r) => r.json())
+      .then((d: GapSummary) => setSummary(d[brand] ?? null))
+      .catch(() => setSummary(null));
+  }, [open, brand]);
+
+  async function narrate() {
+    if (!summary) return;
+    setLoading(true);
+    setNarration(null);
+    try {
+      const res = await fetch(`${API}/api/insight-narration`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ brand, summary }),
+      });
+      const data = await res.json();
+      setNarration(data.narration ?? data.error ?? "No narration returned.");
+    } catch {
+      setNarration("Can't reach the backend for narration.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -544,59 +406,39 @@ function Agent() {
           </div>
 
           <div className="px-5 py-3 border-b border-[var(--line)] flex items-center gap-2">
-            <span className="text-[13px] uppercase tracking-wider text-[var(--muted)]">You are</span>
+            <span className="text-[13px] uppercase tracking-wider text-[var(--muted)]">Brand</span>
             <select
-              value={role}
-              onChange={(e) => setRole(e.target.value as Role)}
+              value={brand}
+              onChange={(e) => setBrand(e.target.value)}
               className="flex-1 bg-[var(--panel-2)] border border-[var(--line)] rounded-md px-3 py-2 text-[15px] text-[var(--ink)] outline-none"
             >
-              {ROLES.map((r) => (
-                <option key={r.key} value={r.key}>{r.label}</option>
+              {REAL_BRANDS.map((b) => (
+                <option key={b} value={b}>{b}</option>
               ))}
             </select>
           </div>
 
-          <div className="px-5 py-4 border-b border-[var(--line)] bg-[var(--panel-2)]">
-            <div className="text-[13px] uppercase tracking-wider text-[var(--accent)] font-semibold">For you</div>
-            <div className="text-[16px] font-semibold mt-1.5 leading-snug">{brief.headline}</div>
-            <ul className="mt-2.5 space-y-1.5">
-              {brief.points.map((p) => (
-                <li key={p} className="text-[14px] text-[var(--muted)] leading-snug flex gap-2">
-                  <span className="text-[var(--accent)] shrink-0">·</span>{p}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3 max-h-[280px]">
-            {messages.length === 0 && (
+          <div className="flex-1 overflow-y-auto px-5 py-4">
+            {!summary && <p className="text-[14px] text-[var(--muted)] leading-relaxed">Loading {brand}&apos;s real numbers&#8230;</p>}
+            {summary && !narration && !loading && (
               <p className="text-[14px] text-[var(--muted)] leading-relaxed">
-                Ask about your GEO data — &quot;why the AI recommends you less&quot;, &quot;what&apos;s the biggest issue&quot;, &quot;where the content gap is&quot;.
+                {summary.total.toLocaleString()} real runs for {brand}: {summary.won} won, {summary.contested} contested,{" "}
+                {summary.lost} lost, {summary.absent} absent. Gemini turns this into a sentence a strategist can act on
+                — not a second measurement, just a read of what Profound already found.
               </p>
             )}
-            {messages.map((m, i) => (
-              <div
-                key={i}
-                className={`max-w-[90%] text-[15px] leading-relaxed px-3.5 py-2.5 rounded-xl ${
-                  m.from === "user" ? "ml-auto bg-[var(--accent)] text-white" : "bg-[var(--panel-2)] text-[var(--ink)]"
-                }`}
-              >
-                {m.text}
-              </div>
-            ))}
+            {loading && <p className="text-[14px] text-[var(--muted)]">Thinking&#8230;</p>}
+            {narration && <p className="text-[15px] leading-relaxed text-[var(--ink)]">{narration}</p>}
           </div>
 
           <div className="border-t border-[var(--line)] p-3">
-            <div className="flex gap-2">
-              <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && send()}
-                placeholder="Ask about your GEO data…"
-                className="flex-1 bg-[var(--panel-2)] border border-[var(--line)] rounded-lg px-3.5 py-2.5 text-[15px] text-[var(--ink)] placeholder:text-[var(--muted)] outline-none focus:border-[var(--accent)]"
-              />
-              <button onClick={send} className="bg-[var(--accent)] text-white text-[15px] font-semibold px-4 rounded-lg hover:brightness-110">Send</button>
-            </div>
+            <button
+              onClick={narrate}
+              disabled={!summary || loading}
+              className="w-full bg-[var(--accent)] text-white text-[15px] font-semibold px-4 py-2.5 rounded-lg hover:brightness-110 disabled:opacity-50"
+            >
+              {loading ? "Thinking…" : "Narrate this gap"}
+            </button>
           </div>
         </div>
       )}
@@ -627,7 +469,8 @@ export default function Home() {
           <div className="flex gap-2 text-sm items-center">
             <a href="/queries" className="text-[var(--accent)] hover:underline">Real queries</a>
             <a href="/analysis" className="text-[var(--accent)] hover:underline">Gap analysis</a>
-            <span className="ml-1 inline-flex items-center text-[13px] text-[var(--neg)] bg-[var(--neg-soft)] px-2.5 py-1.5 rounded-md font-medium">MOCK DATA</span>
+            <span className="ml-1 inline-flex items-center text-[13px] text-[var(--pos)] bg-[var(--pos-soft)] px-2.5 py-1.5 rounded-md font-medium">LIVE — PROFOUND</span>
+            <ThemeToggle />
           </div>
         </div>
       </header>

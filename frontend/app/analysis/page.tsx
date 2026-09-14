@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import ThemeToggle from "@/lib/ThemeToggle";
 
 const tasks = [
   { n: "1", title: "Resource gap analysis", desc: "Compare the prototype and user stories Amiyangsu shared with the business PRD, and identify what is missing, overlapping, or unclear." },
@@ -111,7 +112,10 @@ export default function AnalysisPage() {
       <header className="border-b border-[var(--line)] bg-[var(--panel)] sticky top-0 z-10">
         <div className="max-w-6xl mx-auto w-full px-6 py-5 flex items-center justify-between">
           <h1 className="text-xl font-semibold tracking-tight">Phase 1, 2 and 3</h1>
-          <a href="/" className="text-sm text-[var(--accent)] hover:underline">&larr; Back to the dashboard</a>
+          <div className="flex items-center gap-3">
+            <a href="/" className="text-sm text-[var(--accent)] hover:underline">&larr; Back to the dashboard</a>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import ThemeToggle from "@/lib/ThemeToggle";
 
 const API = process.env.NEXT_PUBLIC_GEOI_API_URL || "http://localhost:4000";
 const BRANDS = ["Wegovy", "Ozempic", "CagriSema"];
@@ -133,6 +134,7 @@ export default function QueriesPage() {
           <div className="flex gap-2 text-sm items-center">
             <a href="/" className="text-[var(--accent)] hover:underline">&larr; Back to the dashboard</a>
             <span className="ml-1 inline-flex items-center text-[13px] text-[var(--pos)] bg-[var(--pos-soft)] px-2.5 py-1.5 rounded-md font-medium">LIVE — PROFOUND</span>
+            <ThemeToggle />
           </div>
         </div>
       </header>

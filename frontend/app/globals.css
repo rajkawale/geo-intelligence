@@ -73,6 +73,66 @@
   --sans: var(--font-family);
 }
 
+/* Dark theme — not in the Indegene guidelines (that system is light-first),
+   built with the same token roles so nothing else in the app has to change.
+   Same values used across every artifact this session for one consistent
+   look. Applies on system preference, and can be forced either way via
+   [data-theme] (see the toggle in each page's header). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --primary: #A78BFA;
+    --primary-light-background: #2A2140;
+    --primary-background-hover: #C4B5FD;
+    --primary-background-pressed: #EDE4FF;
+
+    --success-foreground: #6FCF52;
+    --success-light-background: #132A0E;
+    --error-foreground: #FF6B6B;
+    --error-light-background: #3A1418;
+    --warning-foreground: #F0B429;
+    --warning-light-background: #332208;
+    --info-foreground: #5B9BD5;
+    --info-light-background: #0F2438;
+
+    --base-white: #1E1929;
+    --surface-app-header: #1E1929;
+    --surface-card-tinted: #241B3D;
+    --surface-app-shell-nav: #16121D;
+    --surface-page-content: #16121D;
+
+    --neutral-900: #EFEAF7;
+    --neutral-600: #B3A9C7;
+    --neutral-200: #332A47;
+    --neutral-100: #241B3D;
+  }
+}
+:root[data-theme="dark"] {
+  --primary: #A78BFA;
+  --primary-light-background: #2A2140;
+  --primary-background-hover: #C4B5FD;
+  --primary-background-pressed: #EDE4FF;
+
+  --success-foreground: #6FCF52;
+  --success-light-background: #132A0E;
+  --error-foreground: #FF6B6B;
+  --error-light-background: #3A1418;
+  --warning-foreground: #F0B429;
+  --warning-light-background: #332208;
+  --info-foreground: #5B9BD5;
+  --info-light-background: #0F2438;
+
+  --base-white: #1E1929;
+  --surface-app-header: #1E1929;
+  --surface-card-tinted: #241B3D;
+  --surface-app-shell-nav: #16121D;
+  --surface-page-content: #16121D;
+
+  --neutral-900: #EFEAF7;
+  --neutral-600: #B3A9C7;
+  --neutral-200: #332A47;
+  --neutral-100: #241B3D;
+}
+
 body {
   background: var(--paper);
   color: var(--ink);

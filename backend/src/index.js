@@ -75,17 +75,82 @@ app.get('/api/profound-runs', requireKey, async (req, res) => {
 
 // Content-gap summary — counts per brand x gap_status, the number behind the
 // roadmap's "content-gap diagnosis, not a metric dump" promise.
-app.get('/api/profound-runs/summary', requireKey, async (_req, res) => {
-  const { data, error } = await supabase.from('profound_runs').select('brand, gap_status');
-  if (error) return res.status(500).json({ error: error.message });
+//
+// This used to do `.select('brand, gap_status')` with no range and no order,
+// which PostgREST silently caps at 1000 rows *total, arbitrarily ordered* —
+// at 45,289 real Wegovy rows that was counting well under 2% of the data,
+// and a different arbitrary 2% on every call (one call showed Wegovy at 986
+// rows, the next at 12). Caught by actually loading the dashboard and
+// noticing the number didn't match what fetch-profound.js had logged.
+// Fixed with exact count-only queries — the true total, not a sample of it.
+const KNOWN_BRANDS = ['Wegovy', 'Ozempic', 'CagriSema'];
+const GAP_STATUSES = ['won', 'contested', 'lost', 'absent'];
 
-  const summary = {};
-  for (const row of data) {
-    summary[row.brand] ??= { won: 0, contested: 0, lost: 0, absent: 0, total: 0 };
-    summary[row.brand][row.gap_status] += 1;
-    summary[row.brand].total += 1;
+app.get('/api/profound-runs/summary', requireKey, async (_req, res) => {
+  try {
+    const summary = {};
+    for (const brand of KNOWN_BRANDS) {
+      const counts = { won: 0, contested: 0, lost: 0, absent: 0, total: 0 };
+      let brandTotal = 0;
+      for (const status of GAP_STATUSES) {
+        const { count, error } = await supabase
+          .from('profound_runs')
+          .select('id', { count: 'exact', head: true })
+          .eq('brand', brand)
+          .eq('gap_status', status);
+        if (error) throw error;
+        counts[status] = count ?? 0;
+        brandTotal += count ?? 0;
+      }
+      if (brandTotal > 0) {
+        counts.total = brandTotal;
+        summary[brand] = counts;
+      }
+    }
+    res.json(summary);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
-  res.json(summary);
+});
+
+// Per-engine breakdown — replaces the old "Which AI assistant recommends you"
+// heatmap, which was hardcoded numbers for 4 engines that were never wired to
+// anything. This is the real thing: visibility rate per engine, from the
+// same count-only pattern as /summary (a raw .select() here would hit the
+// same 1000-row cap that broke /summary — see the comment above it).
+// The 8 engines Profound covers, confirmed from a live response's info.models
+// (see 07_product_spec). Hardcoded rather than discovered from a sampled
+// .select() — a sample can miss an engine name entirely, same failure shape
+// as the /summary bug above.
+const KNOWN_ENGINES = [
+  'ChatGPT', 'Google Gemini', 'Meta AI', 'Grok',
+  'Google AI Mode', 'Perplexity', 'Google AI Overviews', 'Microsoft Copilot',
+];
+
+app.get('/api/profound-runs/by-engine', requireKey, async (req, res) => {
+  const { brand } = req.query;
+  if (!brand) return res.status(400).json({ error: 'brand is required' });
+  try {
+    const byEngine = {};
+    for (const engine of KNOWN_ENGINES) {
+      const counts = { won: 0, contested: 0, lost: 0, absent: 0, total: 0 };
+      for (const status of GAP_STATUSES) {
+        const { count, error } = await supabase
+          .from('profound_runs')
+          .select('id', { count: 'exact', head: true })
+          .eq('brand', brand)
+          .eq('engine_name', engine)
+          .eq('gap_status', status);
+        if (error) throw error;
+        counts[status] = count ?? 0;
+        counts.total += count ?? 0;
+      }
+      if (counts.total > 0) byEngine[engine] = counts;
+    }
+    res.json(byEngine);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // Ask I — internal insight narration only (Gemini), over data already
