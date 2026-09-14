@@ -17,7 +17,7 @@
 // brand's backfill until its window is marked 'complete'.
 
 import { supabase } from '../lib/supabase.js';
-import { fetchRealUserRuns } from '../lib/profound.js';
+import { fetchRealUserRuns, ExpiredCursorError } from '../lib/profound.js';
 
 // Novo Nordisk's own brands (Wegovy, Ozempic, CagriSema, Rybelsus) never
 // count as a "competitor" mention, even though they often appear together in
@@ -103,6 +103,18 @@ async function saveState(state) {
   if (error) throw new Error(`save state failed for ${state.brand}: ${error.message}`);
 }
 
+// The true count from the database, not an accumulated in-memory counter —
+// upsert dedupes rows re-fetched after a cursor reset, so counting what
+// actually landed avoids overcounting when a window restarts partway through.
+async function countBrandRows(brand) {
+  const { count, error } = await supabase
+    .from('profound_runs')
+    .select('id', { count: 'exact', head: true })
+    .eq('brand', brand);
+  if (error) throw new Error(`count failed for ${brand}: ${error.message}`);
+  return count ?? 0;
+}
+
 async function upsertRows({ rows, brand, categoryId, aliases }) {
   const withGap = rows.map((r) => {
     const { brandMentioned, competitorMentioned, gapStatus } = diagnoseGap({
@@ -162,6 +174,7 @@ async function main() {
         },
       });
 
+      const rowsFetched = await countBrandRows(brand);
       const newState = {
         brand,
         category_id: categoryId,
@@ -170,20 +183,34 @@ async function main() {
         cursor: nextCursor,
         status: nextCursor ? 'in_progress' : 'complete',
         pages_fetched: state.pages_fetched + pagesFetched,
-        rows_fetched: state.rows_fetched + rowsThisRun,
+        rows_fetched: rowsFetched,
         last_error: null,
       };
       await saveState(newState);
 
-      const pctOfTotal = totalResults ? ((newState.rows_fetched / totalResults) * 100).toFixed(1) : '?';
+      const pctOfTotal = totalResults ? ((rowsFetched / totalResults) * 100).toFixed(1) : '?';
       console.log(
         `${brand}: +${rowsThisRun} rows this run (${pagesThisRun} pages) — ` +
-        `${newState.rows_fetched}/${totalResults ?? '?'} total (${pctOfTotal}%), status=${newState.status}. ` +
+        `${rowsFetched}/${totalResults ?? '?'} total (${pctOfTotal}%), status=${newState.status}. ` +
         `This run: ${gapCounts.won} won, ${gapCounts.contested} contested, ${gapCounts.lost} lost, ${gapCounts.absent} absent.`
       );
     } catch (e) {
-      await saveState({ ...state, last_error: e.message });
-      console.error(`${brand} failed after ${pagesThisRun} pages this run (progress up to that point is saved): ${e.message}`);
+      // A cursor that's gone stale (too much time between runs) is not a
+      // real failure — reset it so the next run restarts the window instead
+      // of retrying the same dead cursor forever, which is what happened
+      // before this fix: 15 straight runs, same error, zero progress.
+      const expired = e instanceof ExpiredCursorError || e?.code === 'EXPIRED_CURSOR';
+      const rowsFetched = await countBrandRows(brand).catch(() => state.rows_fetched);
+      await saveState({
+        ...state,
+        rows_fetched: rowsFetched,
+        cursor: expired ? null : state.cursor,
+        last_error: e.message,
+      });
+      console.error(
+        `${brand} failed after ${pagesThisRun} pages this run (${rowsFetched} rows saved so far): ${e.message}` +
+        (expired ? ' — cursor reset, next run restarts this window (already-fetched rows dedupe safely).' : '')
+      );
     }
   }
 }
