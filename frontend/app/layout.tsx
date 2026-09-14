@@ -1,5 +1,18 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
+
+// Indegene DS 4.Ai — DM Sans, self-hosted. No Google Fonts CDN, no fallback stack.
+const dmSans = localFont({
+  src: [
+    { path: "./fonts/DMSans-Regular.ttf", weight: "400", style: "normal" },
+    { path: "./fonts/DMSans-Medium.ttf", weight: "500", style: "normal" },
+    { path: "./fonts/DMSans-SemiBold.ttf", weight: "600", style: "normal" },
+    { path: "./fonts/DMSans-Bold.ttf", weight: "700", style: "normal" },
+  ],
+  variable: "--font-dm-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "GEO Intelligence (I)",
@@ -13,10 +26,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-zinc-50 text-zinc-900 antialiased">
-        {children}
-      </body>
+    <html lang="en" className={dmSans.variable}>
+      <body className="min-h-screen antialiased">{children}</body>
     </html>
   );
 }

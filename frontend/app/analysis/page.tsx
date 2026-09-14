@@ -16,6 +16,29 @@ const phase1 = [
   { area: "Cross-dashboard interactions", story: "Persistent filters, KPI drilldown, evidence drawer, data quality, config", prototype: "Common navigation / context", prd: "Unified dashboard / reporting", type: "User story → Prototype / PRD gap", gap: "Persistent filters, drilldown, and the evidence drawer are in the story but not consistently represented" },
 ];
 
+const phase3Flow = [
+  { stage: "Input", detail: "Real-user prompts (Profound, third-party) · tracked prompts (platform config) · LLM answers (Gemini API) · citations (first-party + Bing Webmaster Tools) · referral / behaviour (your CRM)" },
+  { stage: "Processing", detail: "Normalize → classify (cluster, intent, journey stage) → measure → compare (competitor, market) → detect gaps (content, coverage) → rank with visible inputs" },
+  { stage: "Output", detail: "Six dashboard modules (Overview, Visibility, Citations, Competitors, Answer quality, Actions) plus routed, approved, measured actions" },
+  { stage: "Failure modes", detail: "Wrong prompt set → measuring the wrong questions · engine/model update → false movement · stale knowledge base → wrong accuracy · citation that doesn't support the claim" },
+];
+
+const phase3Sources = [
+  { capability: "Appears in answers", data: "Question → answer → does the brand appear", source: "Ahrefs", type: "Third-party", status: "Deferred — no key at launch" },
+  { capability: "What people ask", data: "Real-user question volume", source: "Profound", type: "Third-party", status: "Key in hand — blocked on category_id" },
+  { capability: "Cited sources", data: "Cited URLs, domains", source: "Bing Webmaster Tools", type: "Third-party", status: "Deferred — no key at launch" },
+  { capability: "Recommendations", data: "Answer runs on tracked questions", source: "Gemini API", type: "API", status: "Live" },
+  { capability: "Fact accuracy", data: "Approved facts, claims, positioning", source: "Your approved facts (knowledge base)", type: "Internal", status: "MVP scope, not yet built" },
+  { capability: "Clicks that convert", data: "Referral + conversion events", source: "Your CRM", type: "Internal", status: "Not started — downstream of GEO metrics" },
+];
+
+const phase3Tech = [
+  { decision: "Real-user prompts from the Profound API", why: "Only vendor with 1.5B+ real-user prompts; answers \"what users actually ask\" directly. Key in hand." },
+  { decision: "Answer generation via one LLM API, model pinned in an env var", why: "The model is the measurement instrument, not the product — pinning avoids mistaking a model update for brand movement." },
+  { decision: "Database: Supabase (Postgres), dedicated geoi schema", why: "Relational schema fits prompts/answers/citations/actions; row-level security gives pharma role access; separate from KOS infra." },
+  { decision: "No Ahrefs or Bing at launch", why: "Profound alone covers the front-door question (real-user prompts); the other two add citation/backlink depth later, not MVP-blocking." },
+];
+
 const phase2 = [
   { section: "Overview", features: [
     { feature: "KPI cards", question: "How are we performing now?", decision: "Where to focus", best: "Yes, but no priority or cause", verdict: "Keep + simplify" },
@@ -87,7 +110,7 @@ export default function AnalysisPage() {
     <div className="min-h-screen">
       <header className="border-b border-[var(--line)] bg-[var(--panel)] sticky top-0 z-10">
         <div className="max-w-6xl mx-auto w-full px-6 py-5 flex items-center justify-between">
-          <h1 className="text-xl font-semibold tracking-tight">Phase 1 and 2</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Phase 1, 2 and 3</h1>
           <a href="/" className="text-sm text-[var(--accent)] hover:underline">&larr; Back to the dashboard</a>
         </div>
       </header>
@@ -156,6 +179,73 @@ export default function AnalysisPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </Section>
+
+        <Section title="Phase 3 — data and implementation strategy">
+          <div className="space-y-6">
+            <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr><Th>Stage</Th><Th>What happens</Th></tr>
+                  </thead>
+                  <tbody>
+                    {phase3Flow.map((f) => (
+                      <tr key={f.stage} className="hover:bg-[var(--panel-2)]">
+                        <Td className="font-medium whitespace-nowrap">{f.stage}</Td>
+                        <Td className="text-[var(--muted)]">{f.detail}</Td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-[15px] font-semibold mb-3">Capability → data source → status</h3>
+              <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr><Th>Capability</Th><Th>Data</Th><Th>Source</Th><Th>Type</Th><Th>Status</Th></tr>
+                    </thead>
+                    <tbody>
+                      {phase3Sources.map((s) => (
+                        <tr key={s.capability} className="hover:bg-[var(--panel-2)]">
+                          <Td className="font-medium">{s.capability}</Td>
+                          <Td className="text-[var(--muted)]">{s.data}</Td>
+                          <Td className="text-[var(--muted)]">{s.source}</Td>
+                          <Td><span className="provenance third-party" style={s.type === "Internal" ? { color: "var(--primary)", background: "var(--primary-light-background)" } : s.type === "API" ? { color: "var(--warning-foreground)", background: "var(--warning-light-background)" } : undefined}>{s.type}</span></Td>
+                          <Td className="text-[12px] font-medium text-[var(--accent)]">{s.status}</Td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-[15px] font-semibold mb-3">Tech decisions</h3>
+              <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr><Th>Decision</Th><Th>Why</Th></tr>
+                    </thead>
+                    <tbody>
+                      {phase3Tech.map((t) => (
+                        <tr key={t.decision} className="hover:bg-[var(--panel-2)]">
+                          <Td className="font-medium">{t.decision}</Td>
+                          <Td className="text-[var(--muted)]">{t.why}</Td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
           </div>
         </Section>
       </main>

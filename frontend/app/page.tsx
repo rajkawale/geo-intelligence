@@ -203,7 +203,7 @@ function VisibilityExplorer() {
                   <tr key={r.cluster}>
                     <Td>{r.cluster}</Td>
                     {r.rec.map((v, i) => (
-                      <Td key={i}><span className={`num inline-block min-w-[48px] text-center px-2.5 py-1.5 rounded text-sm font-medium ${v < 10 ? "bg-[#0c2a33] text-[#22d3ee]" : v < 25 ? "bg-[#0e3b47] text-[#67e8f9]" : v < 35 ? "bg-[#155e6e] text-white" : "bg-[#22d3ee] text-[#082f3d]"}`}>{v}%</span></Td>
+                      <Td key={i}><span className={`num inline-block min-w-[48px] text-center px-2.5 py-1.5 rounded text-sm font-medium ${v < 10 ? "bg-[var(--neutral-100)] text-[var(--neutral-600)]" : v < 25 ? "bg-[var(--primary-light-background)] text-[var(--primary)]" : v < 35 ? "bg-[var(--primary)] text-white" : "bg-[var(--primary-background-hover)] text-white"}`}>{v}%</span></Td>
                     ))}
                   </tr>
                 ))}
@@ -493,7 +493,7 @@ function Agent() {
               <div
                 key={i}
                 className={`max-w-[90%] text-[15px] leading-relaxed px-3.5 py-2.5 rounded-xl ${
-                  m.from === "user" ? "ml-auto bg-[var(--accent)] text-[#082f3d]" : "bg-[var(--panel-2)] text-[var(--ink)]"
+                  m.from === "user" ? "ml-auto bg-[var(--accent)] text-white" : "bg-[var(--panel-2)] text-[var(--ink)]"
                 }`}
               >
                 {m.text}
@@ -510,7 +510,7 @@ function Agent() {
                 placeholder="Ask about your GEO data…"
                 className="flex-1 bg-[var(--panel-2)] border border-[var(--line)] rounded-lg px-3.5 py-2.5 text-[15px] text-[var(--ink)] placeholder:text-[var(--muted)] outline-none focus:border-[var(--accent)]"
               />
-              <button onClick={send} className="bg-[var(--accent)] text-[#082f3d] text-[15px] font-semibold px-4 rounded-lg hover:brightness-110">Send</button>
+              <button onClick={send} className="bg-[var(--accent)] text-white text-[15px] font-semibold px-4 rounded-lg hover:brightness-110">Send</button>
             </div>
           </div>
         </div>
