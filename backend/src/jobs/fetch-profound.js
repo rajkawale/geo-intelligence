@@ -28,11 +28,20 @@ const COMPETITOR_NAMES = [
   'victoza', 'saxenda', 'bydureon', 'adlyxin',
 ];
 
-const BRANDS = [
+// The full brand catalog GEO I knows about. Brand strategy work happens one
+// brand at a time, not all three at once (Raj's call) — GEOI_ACTIVE_BRANDS
+// controls which of these a given run actually pulls. Default: Wegovy only.
+const ALL_BRANDS = [
   { brand: 'Wegovy', categoryId: '2b524b65-4c96-4f71-a257-f3ebc92eb228', aliases: ['wegovy'] },
   { brand: 'Ozempic', categoryId: 'b8b0354d-ad16-4b2e-9c84-40b01fd89de7', aliases: ['ozempic'] },
   { brand: 'CagriSema', categoryId: '6b76ae30-105a-4b9d-8b70-8c981aac088c', aliases: ['cagrisema'] },
 ];
+
+const activeBrandNames = (process.env.GEOI_ACTIVE_BRANDS || 'Wegovy')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+const BRANDS = ALL_BRANDS.filter((b) => activeBrandNames.includes(b.brand));
 
 function includesAny(mentions, needles) {
   return mentions.some((m) => {
@@ -115,6 +124,9 @@ async function upsertRows({ rows, brand, categoryId, aliases }) {
 }
 
 async function main() {
+  if (!BRANDS.length) {
+    throw new Error(`GEOI_ACTIVE_BRANDS matched none of: ${ALL_BRANDS.map((b) => b.brand).join(', ')}`);
+  }
   const end = new Date();
   const start = new Date();
   start.setDate(start.getDate() - Number(process.env.PROFOUND_FETCH_WINDOW_DAYS || 7));
