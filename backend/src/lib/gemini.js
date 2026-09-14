@@ -65,3 +65,28 @@ export async function generateNarration({ brand, summary }) {
 
   return (await callGemini(instruction)).trim();
 }
+
+// Overview's "Suggested focus" — same lane as generateNarration, given a
+// richer bundle (per-engine + top-competitor rollups) so the suggestion can
+// name a specific engine or competitor instead of restating the totals.
+export async function generateSuggestion({ brand, summary, engines, competitors }) {
+  const instruction = [
+    'You are GEO Intelligence\'s internal insight assistant for a pharma GEO team.',
+    'Below is real content-gap data for one brand: overall counts, a per-AI-engine',
+    'breakdown, and (if present) which competitors show up most in answers where',
+    `${brand} was absent or lost.`,
+    '',
+    'Write one specific, actionable suggestion (2-3 sentences, no preamble, no',
+    'markdown) for what a GEO strategist should look at first. Name the actual',
+    'engine or competitor from the data when one stands out. Do not invent any',
+    'number, engine, or competitor not present below. This is a suggestion to',
+    'verify, not a finding — do not state it as settled fact.',
+    '',
+    `Brand: ${brand}`,
+    `Overall: ${JSON.stringify(summary)}`,
+    `By engine: ${JSON.stringify(engines ?? {})}`,
+    `Top competitors (lost/contested rows): ${JSON.stringify(competitors ?? [])}`,
+  ].join('\n');
+
+  return (await callGemini(instruction)).trim();
+}

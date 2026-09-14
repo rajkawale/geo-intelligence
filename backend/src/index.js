@@ -3,7 +3,7 @@
 
 import express from 'express';
 import { supabase } from './lib/supabase.js';
-import { generateNarration } from './lib/gemini.js';
+import { generateNarration, generateSuggestion } from './lib/gemini.js';
 import 'dotenv/config';
 
 const app = express();
@@ -153,6 +153,49 @@ app.get('/api/profound-runs/by-engine', requireKey, async (req, res) => {
   }
 });
 
+// Competitor rollup — the "Competitive landscape" tab used to say "not built,
+// but the signal is real, just filter /queries to Lost and read the Mentions
+// column." This does that filtering for you. Exact-string .contains() match
+// per known competitor name, same list fetch-profound.js uses to compute
+// competitor_mentioned — NOT the same substring rule (that job does
+// case-insensitive .includes(), this does exact array-element match), so a
+// mention like "Mounjaro (tirzepatide)" would be missed here but still counted
+// in the brand's overall Lost/Contested totals above. Undercounts, never
+// overcounts — labelled as such in the UI.
+const KNOWN_COMPETITORS = [
+  'Mounjaro', 'Zepbound', 'Trulicity', 'Jardiance', 'Farxiga',
+  'Victoza', 'Saxenda', 'Bydureon', 'Adlyxin',
+];
+
+app.get('/api/profound-runs/competitors', requireKey, async (req, res) => {
+  const { brand } = req.query;
+  if (!brand) return res.status(400).json({ error: 'brand is required' });
+  try {
+    const rows = [];
+    for (const name of KNOWN_COMPETITORS) {
+      // supabase-js's .contains() mis-encodes a jsonb array containment filter
+      // (sends a Postgres array literal, PostgREST wants JSON) and fails with
+      // "invalid input syntax for type json" — .filter(col, 'cs', json) sends
+      // the same "cs." operator with the JSON encoding PostgREST actually needs.
+      const [lostRes, contestedRes] = await Promise.all([
+        supabase.from('profound_runs').select('id', { count: 'exact', head: true })
+          .eq('brand', brand).eq('gap_status', 'lost').filter('mentions', 'cs', JSON.stringify([name])),
+        supabase.from('profound_runs').select('id', { count: 'exact', head: true })
+          .eq('brand', brand).eq('gap_status', 'contested').filter('mentions', 'cs', JSON.stringify([name])),
+      ]);
+      if (lostRes.error) throw lostRes.error;
+      if (contestedRes.error) throw contestedRes.error;
+      const lost = lostRes.count ?? 0;
+      const contested = contestedRes.count ?? 0;
+      if (lost + contested > 0) rows.push({ competitor: name, lost, contested, total: lost + contested });
+    }
+    rows.sort((a, b) => b.total - a.total);
+    res.json({ rows, note: 'Exact-name match — undercounts rows where the mention includes extra text (e.g. "Mounjaro (tirzepatide)"). Never overcounts.' });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Ask I — internal insight narration only (Gemini), over data already
 // measured by Profound. Not a second measurement pipeline.
 app.post('/api/insight-narration', requireKey, async (req, res) => {
@@ -161,6 +204,22 @@ app.post('/api/insight-narration', requireKey, async (req, res) => {
   try {
     const narration = await generateNarration({ brand, summary });
     res.json({ narration });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// "Suggested focus" on Overview — same Gemini insight-curation lane as Ask I,
+// given a richer real-data bundle (gap summary + per-engine breakdown + top
+// competitors) so the suggestion can point at a specific engine/competitor
+// instead of just repeating the totals. Still not a measurement pipeline —
+// Gemini only reads numbers Profound and the rollups above already produced.
+app.post('/api/insight-suggestion', requireKey, async (req, res) => {
+  const { brand, summary, engines, competitors } = req.body || {};
+  if (!brand || !summary) return res.status(400).json({ error: 'brand and summary are required' });
+  try {
+    const suggestion = await generateSuggestion({ brand, summary, engines, competitors });
+    res.json({ suggestion });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

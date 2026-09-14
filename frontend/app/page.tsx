@@ -7,6 +7,8 @@ import { SOURCES } from "@/lib/mockData";
 const API = process.env.NEXT_PUBLIC_GEOI_API_URL || "http://localhost:4000";
 const REAL_BRANDS = ["Wegovy", "Ozempic", "CagriSema"];
 type GapSummary = Record<string, { won: number; contested: number; lost: number; absent: number; total: number }>;
+type EngineBreakdown = Record<string, { won: number; contested: number; lost: number; absent: number; total: number }>;
+type CompetitorRow = { competitor: string; lost: number; contested: number; total: number };
 
 function SourceTag({ k }: { k: string }) {
   const s = SOURCES[k];
@@ -53,23 +55,90 @@ function Section({ title, children }: { title: string; hint?: string; children: 
   );
 }
 
-function WhatToDo() {
-  return (
-    <Section title="What to do" hint="the decision, then the evidence">
-      <Pending needs="GEO Craft" note="This showed two fabricated actions ('publish a comparison page', 'fix positioning') that were never actually taken — killed rather than imply work happened. Once Craft exists, real content-gap briefs land here." />
-    </Section>
-  );
-}
+// Replaces the old "What to do" (fake actions) and "Why it matters" (fake
+// health score) with one thing that's actually real: Gemini reading the same
+// real aggregates shown elsewhere on this page and naming what to look at
+// first. Fetches the aggregates automatically; the Gemini call itself is a
+// manual click, same pattern as Ask I, so switching brands doesn't burn a
+// Gemini call nobody asked for.
+function SuggestedFocus() {
+  const [brand, setBrand] = useState("Wegovy");
+  const [summary, setSummary] = useState<GapSummary[string] | null>(null);
+  const [engines, setEngines] = useState<EngineBreakdown | null>(null);
+  const [competitors, setCompetitors] = useState<CompetitorRow[] | null>(null);
+  const [suggestion, setSuggestion] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-function WhyItMatters() {
+  useEffect(() => {
+    setSuggestion(null);
+    setError(null);
+    Promise.all([
+      fetch(`${API}/api/profound-runs/summary`).then((r) => r.json()),
+      fetch(`${API}/api/profound-runs/by-engine?brand=${brand}`).then((r) => r.json()),
+      fetch(`${API}/api/profound-runs/competitors?brand=${brand}`).then((r) => r.json()),
+    ])
+      .then(([summaryData, engineData, competitorData]) => {
+        setSummary(summaryData[brand] ?? null);
+        setEngines(engineData);
+        setCompetitors(competitorData.rows ?? []);
+      })
+      .catch(() => setError("Can't reach the backend"));
+  }, [brand]);
+
+  async function generate() {
+    if (!summary) return;
+    setLoading(true);
+    setSuggestion(null);
+    try {
+      const res = await fetch(`${API}/api/insight-suggestion`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ brand, summary, engines, competitors: competitors?.slice(0, 3) }),
+      });
+      const data = await res.json();
+      setSuggestion(data.suggestion ?? data.error ?? "No suggestion returned.");
+    } catch {
+      setSuggestion("Can't reach the backend for a suggestion.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <Section title="Why it matters" hint="a made-up health score and a hardcoded opportunity — replaced by the real thing above">
-      <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-6 text-[14px] text-[var(--muted)] leading-relaxed">
-        <span className="font-medium text-[var(--ink)]">Killed, not rebuilt.</span> This used to show a health score with
-        arbitrary weights (40/30/30, never validated) and a hardcoded "opportunity" about diabetes-treatment questions in
-        India — leftover from the old Ozempic demo, unrelated to the real Wegovy data above. The real version of "why it
-        matters" is the Real signal panel and Ask I's narration, both live. Didn't fabricate a replacement just to fill
-        this space.
+    <Section title="Suggested focus" hint="Gemini reading the real numbers above — a suggestion to verify, not a finding">
+      <div className="flex gap-2 mb-4">
+        {REAL_BRANDS.map((b) => (
+          <button
+            key={b}
+            onClick={() => setBrand(b)}
+            className={`px-3 py-1.5 rounded-lg text-[13px] font-medium border ${
+              brand === b ? "bg-[var(--accent)] text-white border-[var(--accent)]" : "border-[var(--line)] text-[var(--muted)] hover:text-[var(--ink)]"
+            }`}
+          >
+            {b}
+          </button>
+        ))}
+      </div>
+      <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-6">
+        {error && <p className="text-[14px] text-[var(--neg)]">{error}</p>}
+        {!error && !summary && <p className="text-[14px] text-[var(--muted)]">Loading {brand}&apos;s real numbers&#8230;</p>}
+        {!error && summary && !suggestion && !loading && (
+          <p className="text-[14px] text-[var(--muted)] leading-relaxed">
+            Ready — {summary.total.toLocaleString()} real runs, {engines ? Object.keys(engines).length : 0} engines,{" "}
+            {competitors?.length ?? 0} competitors with real mentions. Gemini can read all of it and point at what to
+            look at first.
+          </p>
+        )}
+        {loading && <p className="text-[14px] text-[var(--muted)]">Thinking&#8230;</p>}
+        {suggestion && <p className="text-[15px] leading-relaxed text-[var(--ink)]">{suggestion}</p>}
+        <button
+          onClick={generate}
+          disabled={!summary || loading}
+          className="mt-4 bg-[var(--accent)] text-white text-[14px] font-semibold px-4 py-2 rounded-lg hover:brightness-110 disabled:opacity-50"
+        >
+          {loading ? "Thinking…" : suggestion ? "Regenerate" : "Generate suggestion"}
+        </button>
       </div>
     </Section>
   );
@@ -163,8 +232,6 @@ function DidItMove() {
     </Section>
   );
 }
-
-type EngineBreakdown = Record<string, { won: number; contested: number; lost: number; absent: number; total: number }>;
 
 function EngineHeatmap() {
   const [brand, setBrand] = useState("Wegovy");
@@ -288,13 +355,71 @@ function AnswerQuality() {
   );
 }
 
+// Real, replacing the old "not built" placeholder — an exact-name rollup
+// over the same `mentions` array Profound already gives every run. Rows can
+// mention more than one competitor, so the Lost/Contested columns don't sum
+// to the brand's overall totals — that's expected, not a bug.
 function CompetitiveLandscape() {
+  const [brand, setBrand] = useState("Wegovy");
+  const [rows, setRows] = useState<CompetitorRow[] | null>(null);
+  const [note, setNote] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setRows(null);
+    fetch(`${API}/api/profound-runs/competitors?brand=${brand}`)
+      .then(async (r) => {
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || `${r.status}`);
+        setRows(d.rows ?? []);
+        setNote(d.note ?? null);
+        setError(null);
+      })
+      .catch((e) => setError(e instanceof Error ? e.message : "Can't reach the backend"));
+  }, [brand]);
+
   return (
-    <Section title="You vs competitors" hint="real competitor names are already in every mention — ranking them isn't built">
-      <Pending
-        needs="per-competitor aggregation over real mention data"
-        note={'Real example, from the actual data: filter /queries to "Lost" and the Mentions column is dominated by one name — that IS the competitive signal. A ranked rollup of it is real, buildable work, not done yet.'}
-      />
+    <Section title="You vs competitors" hint="real mentions in Lost/Contested rows, ranked — exact-name match, so this undercounts, never overcounts">
+      <div className="flex gap-2 mb-4">
+        {REAL_BRANDS.map((b) => (
+          <button
+            key={b}
+            onClick={() => setBrand(b)}
+            className={`px-3 py-1.5 rounded-lg text-[13px] font-medium border ${
+              brand === b ? "bg-[var(--accent)] text-white border-[var(--accent)]" : "border-[var(--line)] text-[var(--muted)] hover:text-[var(--ink)]"
+            }`}
+          >
+            {b}
+          </button>
+        ))}
+      </div>
+      {error && <div className="bg-[var(--neg-soft)] border border-[var(--neg)] text-[var(--neg)] rounded-xl p-4 text-sm">{error}</div>}
+      {!error && !rows && <div className="text-[13px] text-[var(--muted)]">Loading&#8230;</div>}
+      {!error && rows && rows.length === 0 && (
+        <div className="text-[13px] text-[var(--muted)]">No known competitor names matched in {brand}&apos;s Lost/Contested rows.</div>
+      )}
+      {!error && rows && rows.length > 0 && (
+        <>
+          <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead><tr><Th>Competitor</Th><Th>Lost (them only)</Th><Th>Contested (both)</Th><Th>Total mentions</Th></tr></thead>
+                <tbody>
+                  {rows.map((r) => (
+                    <tr key={r.competitor} className="hover:bg-[var(--panel-2)]">
+                      <Td className="font-medium">{r.competitor}</Td>
+                      <Td className="num text-[var(--neg)]">{r.lost}</Td>
+                      <Td className="num">{r.contested}</Td>
+                      <Td className="num font-medium">{r.total}</Td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {note && <p className="text-[12px] text-[var(--muted)] mt-3">{note}</p>}
+        </>
+      )}
     </Section>
   );
 }
@@ -493,8 +618,7 @@ export default function Home() {
         {view === "overview" && (
           <>
             <RealSignal />
-            <WhatToDo />
-            <WhyItMatters />
+            <SuggestedFocus />
             <DidItMove />
           </>
         )}
