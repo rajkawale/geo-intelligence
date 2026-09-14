@@ -540,6 +540,7 @@ export default function Home() {
             <h1 className="text-xl font-semibold tracking-tight">GEO Intelligence</h1>
           </div>
           <div className="flex gap-2 text-sm items-center">
+            <a href="/queries" className="text-[var(--accent)] hover:underline">Real queries</a>
             <a href="/analysis" className="text-[var(--accent)] hover:underline">Gap analysis</a>
             <span className="ml-1 inline-flex items-center text-[13px] text-[var(--neg)] bg-[var(--neg-soft)] px-2.5 py-1.5 rounded-md font-medium">MOCK DATA</span>
           </div>
