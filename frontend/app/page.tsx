@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   SOURCES,
   health,
@@ -27,6 +27,10 @@ import {
   agentRespond,
   type Role,
 } from "@/lib/mockData";
+
+const API = process.env.NEXT_PUBLIC_GEOI_API_URL || "http://localhost:4000";
+const REAL_BRANDS = ["Wegovy", "Ozempic", "CagriSema"];
+type GapSummary = Record<string, { won: number; contested: number; lost: number; absent: number; total: number }>;
 
 function SourceTag({ k }: { k: string }) {
   const s = SOURCES[k];
@@ -139,6 +143,87 @@ function WhyItMatters() {
           ))}
         </div>
       </div>
+    </Section>
+  );
+}
+
+function RealSignal() {
+  const [brand, setBrand] = useState("Wegovy");
+  const [summary, setSummary] = useState<GapSummary | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch(`${API}/api/profound-runs/summary`)
+      .then(async (r) => {
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || `${r.status}`);
+        setSummary(d);
+        setError(null);
+      })
+      .catch((e) => setError(e instanceof Error ? e.message : "Can't reach the backend"));
+  }, []);
+
+  const s = summary?.[brand];
+  const pct = (n: number) => (s && s.total ? Math.round((n / s.total) * 1000) / 10 : 0);
+
+  return (
+    <Section title="Real signal" hint="Profound, live — separate from the mock KPIs on this page">
+      <div className="flex items-center justify-between mb-3 flex-wrap gap-3">
+        <div className="flex gap-2">
+          {REAL_BRANDS.map((b) => (
+            <button
+              key={b}
+              onClick={() => setBrand(b)}
+              className={`px-3 py-1.5 rounded-lg text-[13px] font-medium border ${
+                brand === b ? "bg-[var(--accent)] text-white border-[var(--accent)]" : "border-[var(--line)] text-[var(--muted)] hover:text-[var(--ink)]"
+              }`}
+            >
+              {b}
+            </button>
+          ))}
+        </div>
+        <a href="/queries" className="text-[13px] text-[var(--accent)] hover:underline">See the real queries &rarr;</a>
+      </div>
+
+      {error && (
+        <div className="bg-[var(--neg-soft)] border border-[var(--neg)] text-[var(--neg)] rounded-xl p-4 text-sm">
+          {error.includes("profound_runs")
+            ? `No real data pulled yet for ${brand}. Run backend: npm run job:fetch-profound`
+            : error}
+        </div>
+      )}
+
+      {!error && s && (
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="bg-[var(--panel)] border border-[var(--accent)] rounded-xl p-5">
+            <div className="text-[13px] text-[var(--muted)]">Visibility rate</div>
+            <div className="num text-3xl font-semibold text-[var(--accent)] mt-1.5">{pct(s.won + s.contested)}%</div>
+            <div className="mt-2.5 text-[11px] text-[var(--muted)]">brand named, any capacity</div>
+          </div>
+          <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
+            <div className="text-[13px] text-[var(--muted)]">Won</div>
+            <div className="num text-3xl font-semibold text-[var(--pos)] mt-1.5">{s.won}</div>
+            <div className="mt-2.5 text-[11px] text-[var(--muted)]">brand only</div>
+          </div>
+          <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
+            <div className="text-[13px] text-[var(--muted)]">Contested</div>
+            <div className="num text-3xl font-semibold mt-1.5">{s.contested}</div>
+            <div className="mt-2.5 text-[11px] text-[var(--muted)]">brand + competitor</div>
+          </div>
+          <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
+            <div className="text-[13px] text-[var(--muted)]">Lost</div>
+            <div className="num text-3xl font-semibold text-[var(--neg)] mt-1.5">{s.lost}</div>
+            <div className="mt-2.5 text-[11px] text-[var(--muted)]">competitor only</div>
+          </div>
+          <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
+            <div className="text-[13px] text-[var(--muted)]">Runs pulled</div>
+            <div className="num text-3xl font-semibold mt-1.5">{s.total}</div>
+            <div className="mt-2.5"><SourceTag k="profound" /></div>
+          </div>
+        </div>
+      )}
+
+      {!error && !s && <div className="text-[13px] text-[var(--muted)]">Loading&#8230;</div>}
     </Section>
   );
 }
@@ -564,6 +649,7 @@ export default function Home() {
       <main className="max-w-6xl mx-auto w-full px-6 py-8">
         {view === "overview" && (
           <>
+            <RealSignal />
             <WhatToDo />
             <WhyItMatters />
             <DidItMove />
