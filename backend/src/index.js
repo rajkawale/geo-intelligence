@@ -9,10 +9,22 @@ import 'dotenv/config';
 const app = express();
 app.use(express.json());
 
-// The frontend (Next.js, a different port in dev) calls this API from the
-// browser — allow it. Tighten to a specific origin before deploying.
+// The frontend calls this API from the browser — allow it, but not from
+// anywhere. Every Vercel preview deployment gets its own unique subdomain
+// (geo-intelligence-<hash>-rajs-projects-....vercel.app), so a single fixed
+// origin would break every preview; matching the project's own Vercel
+// domains plus localhost (dev) is the actual tightening promised by the old
+// comment here, not the `*` it left in place.
+const ALLOWED_ORIGIN_PATTERNS = [
+  /^https:\/\/geo-intelligence(-[a-z0-9-]+)?\.vercel\.app$/,
+  /^http:\/\/localhost:\d+$/,
+];
 app.use((req, res, next) => {
-  res.set('Access-Control-Allow-Origin', '*');
+  const origin = req.get('Origin');
+  if (origin && ALLOWED_ORIGIN_PATTERNS.some((p) => p.test(origin))) {
+    res.set('Access-Control-Allow-Origin', origin);
+    res.set('Vary', 'Origin');
+  }
   res.set('Access-Control-Allow-Headers', 'Content-Type, x-api-key');
   res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   if (req.method === 'OPTIONS') return res.sendStatus(204);
