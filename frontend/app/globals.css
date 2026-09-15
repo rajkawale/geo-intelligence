@@ -73,68 +73,86 @@
   --sans: var(--font-family);
 }
 
-/* Dark theme — not in the Indegene guidelines (that system is light-first),
-   built with the same token roles so nothing else in the app has to change.
-   Same values used across every artifact this session for one consistent
-   look. Applies on system preference, and can be forced either way via
+/* Dark theme — no longer Indegene's. GEO I watches whether Wegovy gets
+   picked up in AI answers across eight engines; the palette borrows from an
+   instrument that does exactly that kind of detection work — a deep
+   graphite panel, a signal teal for "found," amber for "needs attention" —
+   rather than a rebrand of the light Indegene palette. Same custom-property
+   names as before (component code reads --primary, --neutral-600, etc.
+   directly in a few places, e.g. the engine heatmap's intensity scale) so
+   nothing else in the app needed to change, only what these resolve to.
+   Applies on system preference, and can be forced either way via
    [data-theme] (see the toggle in each page's header). */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --primary: #A78BFA;
-    --primary-light-background: #2A2140;
-    --primary-background-hover: #C4B5FD;
-    --primary-background-pressed: #EDE4FF;
+    --primary: #0D9488;
+    --primary-light-background: #0F2C2A;
+    --primary-background-hover: #0B7A70;
+    --primary-background-pressed: #095F58;
 
-    --success-foreground: #6FCF52;
-    --success-light-background: #132A0E;
-    --error-foreground: #FF6B6B;
-    --error-light-background: #3A1418;
-    --warning-foreground: #F0B429;
-    --warning-light-background: #332208;
-    --info-foreground: #5B9BD5;
-    --info-light-background: #0F2438;
+    --success-foreground: #34C97A;
+    --success-light-background: #0F2A1C;
+    --error-foreground: #F0576B;
+    --error-light-background: #34121A;
+    --warning-foreground: #E8A33D;
+    --warning-light-background: #2E2007;
+    --info-foreground: #5B9EE8;
+    --info-light-background: #122036;
 
-    --base-white: #1E1929;
-    --surface-app-header: #1E1929;
-    --surface-card-tinted: #241B3D;
-    --surface-app-shell-nav: #16121D;
-    --surface-page-content: #16121D;
+    --base-white: #12151B;
+    --surface-app-header: #0D0F14;
+    --surface-card-tinted: #191D24;
+    --surface-app-shell-nav: #0D0F14;
+    --surface-page-content: #0A0C10;
 
-    --neutral-900: #EFEAF7;
-    --neutral-600: #B3A9C7;
-    --neutral-200: #332A47;
-    --neutral-100: #241B3D;
+    --neutral-900: #EEF1F5;
+    --neutral-600: #96A0AD;
+    --neutral-200: #262B34;
+    --neutral-100: #171B21;
+
+    /* A terminal-readout weight on every number (.num below) — the one
+       typographic departure this theme makes, and a functional one: real
+       counts and percentages, not decorative labels. */
+    --mono: ui-monospace, "SF Mono", "Berkeley Mono", Menlo, Consolas, "Roboto Mono", monospace;
+    --bg-glow: radial-gradient(ellipse 1100px 560px at 50% -12%, rgba(13, 148, 136, 0.10), transparent 60%);
+    --selection-bg: rgba(13, 148, 136, 0.35);
   }
 }
 :root[data-theme="dark"] {
-  --primary: #A78BFA;
-  --primary-light-background: #2A2140;
-  --primary-background-hover: #C4B5FD;
-  --primary-background-pressed: #EDE4FF;
+  --primary: #0D9488;
+  --primary-light-background: #0F2C2A;
+  --primary-background-hover: #0B7A70;
+  --primary-background-pressed: #095F58;
 
-  --success-foreground: #6FCF52;
-  --success-light-background: #132A0E;
-  --error-foreground: #FF6B6B;
-  --error-light-background: #3A1418;
-  --warning-foreground: #F0B429;
-  --warning-light-background: #332208;
-  --info-foreground: #5B9BD5;
-  --info-light-background: #0F2438;
+  --success-foreground: #34C97A;
+  --success-light-background: #0F2A1C;
+  --error-foreground: #F0576B;
+  --error-light-background: #34121A;
+  --warning-foreground: #E8A33D;
+  --warning-light-background: #2E2007;
+  --info-foreground: #5B9EE8;
+  --info-light-background: #122036;
 
-  --base-white: #1E1929;
-  --surface-app-header: #1E1929;
-  --surface-card-tinted: #241B3D;
-  --surface-app-shell-nav: #16121D;
-  --surface-page-content: #16121D;
+  --base-white: #12151B;
+  --surface-app-header: #0D0F14;
+  --surface-card-tinted: #191D24;
+  --surface-app-shell-nav: #0D0F14;
+  --surface-page-content: #0A0C10;
 
-  --neutral-900: #EFEAF7;
-  --neutral-600: #B3A9C7;
-  --neutral-200: #332A47;
-  --neutral-100: #241B3D;
+  --neutral-900: #EEF1F5;
+  --neutral-600: #96A0AD;
+  --neutral-200: #262B34;
+  --neutral-100: #171B21;
+
+  --mono: ui-monospace, "SF Mono", "Berkeley Mono", Menlo, Consolas, "Roboto Mono", monospace;
+  --bg-glow: radial-gradient(ellipse 1100px 560px at 50% -12%, rgba(13, 148, 136, 0.10), transparent 60%);
+  --selection-bg: rgba(13, 148, 136, 0.35);
 }
 
 body {
-  background: var(--paper);
+  background-color: var(--paper);
+  background-image: var(--bg-glow, none);
+  background-repeat: no-repeat;
   color: var(--ink);
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
@@ -187,8 +205,11 @@ body {
 .signal .seg.on { background: var(--accent); }
 .signal .seg.on.warn { background: var(--neg); }
 
+/* accent-soft is a near-black teal tint in dark mode (barely lifts off the
+   page), so selection needs its own, more visible value there — see the
+   dark blocks above for --selection-bg. */
 ::selection {
-  background: var(--accent-soft);
+  background: var(--selection-bg, var(--accent-soft));
 }
 
 /* The product's "I" — a serif so it reads as a letter, not a vertical bar. */

@@ -55,6 +55,45 @@ function Section({ title, children }: { title: string; hint?: string; children: 
   );
 }
 
+// A stat number on its own explained nothing about what it measured or what
+// to do next — raised on real feedback: it wasn't clickable and nobody could
+// tell what "contested" meant without guessing. Every tile now names itself
+// on hover (title) and drills into the real rows behind the count.
+function StatTile({
+  href,
+  label,
+  value,
+  caption,
+  title,
+  accent,
+  valueClass = "",
+}: {
+  href: string;
+  label: string;
+  value: string | number;
+  caption: React.ReactNode;
+  title: string;
+  accent?: boolean;
+  valueClass?: string;
+}) {
+  return (
+    <a
+      href={href}
+      title={title}
+      className={`block bg-[var(--panel)] border rounded-xl p-5 transition hover:border-[var(--accent)] hover:-translate-y-0.5 ${
+        accent ? "border-[var(--accent)]" : "border-[var(--line)]"
+      }`}
+    >
+      <div className="text-[13px] text-[var(--muted)]">{label}</div>
+      <div className={`num text-3xl font-semibold mt-1.5 ${valueClass}`}>{value}</div>
+      <div className="mt-2.5 text-[11px] text-[var(--muted)] flex items-center gap-1.5">
+        {caption}
+        <span className="text-[var(--accent)]">&rarr;</span>
+      </div>
+    </a>
+  );
+}
+
 // Replaces the old "What to do" (fake actions) and "Why it matters" (fake
 // health score) with one thing that's actually real: Gemini reading the same
 // real aggregates shown elsewhere on this page and naming what to look at
@@ -176,31 +215,45 @@ function RealSignal({ brand }: { brand: string }) {
 
       {!error && s && (
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <div className="bg-[var(--panel)] border border-[var(--accent)] rounded-xl p-5">
-            <div className="text-[13px] text-[var(--muted)]">Visibility rate</div>
-            <div className="num text-3xl font-semibold text-[var(--accent)] mt-1.5">{pct(s.won + s.contested)}%</div>
-            <div className="mt-2.5 text-[11px] text-[var(--muted)]">brand named, any capacity</div>
-          </div>
-          <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
-            <div className="text-[13px] text-[var(--muted)]">Won</div>
-            <div className="num text-3xl font-semibold text-[var(--pos)] mt-1.5">{s.won}</div>
-            <div className="mt-2.5 text-[11px] text-[var(--muted)]">brand only</div>
-          </div>
-          <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
-            <div className="text-[13px] text-[var(--muted)]">Contested</div>
-            <div className="num text-3xl font-semibold mt-1.5">{s.contested}</div>
-            <div className="mt-2.5 text-[11px] text-[var(--muted)]">brand + competitor</div>
-          </div>
-          <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
-            <div className="text-[13px] text-[var(--muted)]">Lost</div>
-            <div className="num text-3xl font-semibold text-[var(--neg)] mt-1.5">{s.lost}</div>
-            <div className="mt-2.5 text-[11px] text-[var(--muted)]">competitor only</div>
-          </div>
-          <div className="bg-[var(--panel)] border border-[var(--line)] rounded-xl p-5">
-            <div className="text-[13px] text-[var(--muted)]">Runs pulled</div>
-            <div className="num text-3xl font-semibold mt-1.5">{s.total}</div>
-            <div className="mt-2.5"><SourceTag k="profound" /></div>
-          </div>
+          <StatTile
+            href={`/queries?brand=${brand}`}
+            accent
+            label="Visibility rate"
+            value={`${pct(s.won + s.contested)}%`}
+            valueClass="text-[var(--accent)]"
+            caption="brand named, any capacity"
+            title="Share of real questions where Wegovy showed up at all — alone (won) or alongside a competitor (contested). Click to see those real answers."
+          />
+          <StatTile
+            href={`/queries?brand=${brand}&gap_status=won`}
+            label="Won"
+            value={s.won}
+            valueClass="text-[var(--pos)]"
+            caption="brand only"
+            title="The AI's answer named Wegovy and no competitor — the clean win. Click to see these real answers."
+          />
+          <StatTile
+            href={`/queries?brand=${brand}&gap_status=contested`}
+            label="Contested"
+            value={s.contested}
+            caption="brand + competitor"
+            title="The AI's answer named both Wegovy and a competitor in the same response — you're sharing the spotlight. Click to see these real answers."
+          />
+          <StatTile
+            href={`/queries?brand=${brand}&gap_status=lost`}
+            label="Lost"
+            value={s.lost}
+            valueClass="text-[var(--neg)]"
+            caption="competitor only"
+            title="The AI recommended a competitor and never named Wegovy — the clearest gap to close. Click to see these real answers."
+          />
+          <StatTile
+            href={`/queries?brand=${brand}`}
+            label="Runs pulled"
+            value={s.total}
+            caption={<SourceTag k="profound" />}
+            title="Every real question Profound tested against a real AI engine for this brand. Click to browse all of them."
+          />
         </div>
       )}
 

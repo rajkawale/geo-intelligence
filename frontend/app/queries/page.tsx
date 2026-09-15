@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { Suspense, useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import ThemeToggle from "@/lib/ThemeToggle";
 import { apiFetch } from "@/lib/api";
 
@@ -51,9 +52,13 @@ function Td({ children, className = "" }: { children: React.ReactNode; className
   return <td className={`px-4 py-3 border-b border-[var(--line)] text-[14px] align-top ${className}`}>{children}</td>;
 }
 
-export default function QueriesPage() {
-  const [brand, setBrand] = useState("Wegovy");
-  const [gapStatus, setGapStatus] = useState("");
+// Coming from a dashboard stat tile (e.g. "Lost" on Overview) should land
+// here already filtered, not on the default unfiltered view — that's the
+// whole point of making those tiles clickable.
+function QueriesPageInner() {
+  const params = useSearchParams();
+  const [brand, setBrand] = useState(() => params.get("brand") || "Wegovy");
+  const [gapStatus, setGapStatus] = useState(() => params.get("gap_status") || "");
   const [q, setQ] = useState("");
   const [rows, setRows] = useState<Run[] | null>(null);
   const [total, setTotal] = useState(0);
@@ -184,12 +189,26 @@ export default function QueriesPage() {
 
         {brandSummary && (
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
-            {(["total", "won", "contested", "lost", "absent"] as const).map((k) => (
-              <div key={k} className={`bg-[var(--panel)] border rounded-xl p-4 ${k === "total" ? "border-[var(--accent)]" : "border-[var(--line)]"}`}>
-                <div className={`num text-2xl font-bold ${k === "total" ? "text-[var(--accent)]" : ""}`}>{brandSummary[k]}</div>
-                <div className="text-[12px] text-[var(--muted)] mt-1 capitalize">{k === "total" ? "runs pulled" : k}</div>
-              </div>
-            ))}
+            {(["total", "won", "contested", "lost", "absent"] as const).map((k) => {
+              const active = k === "total" ? gapStatus === "" : gapStatus === k;
+              return (
+                <button
+                  key={k}
+                  onClick={() => setGapStatus(k === "total" ? "" : k === gapStatus ? "" : k)}
+                  title={
+                    k === "total"
+                      ? "Every real question Profound tested against a real AI engine for this brand."
+                      : `${GAP_LABEL[k]}. Click to filter the table below to just these rows.`
+                  }
+                  className={`text-left bg-[var(--panel)] border rounded-xl p-4 transition hover:border-[var(--accent)] ${
+                    active ? "border-[var(--accent)] ring-1 ring-[var(--accent)]" : "border-[var(--line)]"
+                  }`}
+                >
+                  <div className={`num text-2xl font-bold ${k === "total" ? "text-[var(--accent)]" : ""}`}>{brandSummary[k]}</div>
+                  <div className="text-[12px] text-[var(--muted)] mt-1 capitalize">{k === "total" ? "runs pulled" : k}</div>
+                </button>
+              );
+            })}
           </div>
         )}
 
@@ -249,5 +268,13 @@ export default function QueriesPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function QueriesPage() {
+  return (
+    <Suspense fallback={null}>
+      <QueriesPageInner />
+    </Suspense>
   );
 }
